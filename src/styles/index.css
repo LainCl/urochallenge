@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-primary: #5149B8;
+    --color-primary-light: #7778ED;
+    --color-sky: #83D0E5;
+    --color-turquoise: #B8E5E8;
+    --color-lime: #C3F574;
+    --color-bg-soft: #F5F7FC;
+    --color-text-main: #202744;
+    --color-text-muted: #858BA1;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--color-bg-soft);
+    color: var(--color-text-main);
+  }
+}
+
+/* Custom utility classes matching the reference aesthetic */
+.bg-mesh-violet {
+  background: radial-gradient(circle at 15% 15%, rgba(119, 120, 237, 0.22) 0%, transparent 45%),
+              radial-gradient(circle at 85% 25%, rgba(131, 208, 229, 0.25) 0%, transparent 50%),
+              linear-gradient(180deg, #ECEBFF 0%, #F5F7FC 60%, #F5F7FC 100%);
+}
+
+.card-hero-violet {
+  background: linear-gradient(135deg, #5149B8 0%, #7778ED 100%);
+  box-shadow: 0 18px 36px -10px rgba(81, 73, 184, 0.35);
+}
+
+.card-soft-shadow {
+  box-shadow: 0 10px 30px -5px rgba(32, 39, 68, 0.05), 0 4px 12px -2px rgba(81, 73, 184, 0.04);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 12px 32px -4px rgba(32, 39, 68, 0.12);
+}
