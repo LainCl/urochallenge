@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Bell,
@@ -11,14 +11,61 @@ import {
   ArrowUpRight,
   BookOpenCheck,
   Trophy,
+  Gift,
+  CheckCheck,
+  X,
 } from 'lucide-react';
 import { Profile, Category, DailyAssignment, Question, QuestionSchedule } from '../../types/domain';
+import { uroRepository } from '../../services/uroRepository';
 import { CategoryIcon } from '../common/CategoryIcon';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+interface AppNotificationItem {
+  id: string;
+  title: string;
+  message: string;
+  timeLabel: string;
+  type: 'daily' | 'level' | 'achievement' | 'reward' | 'study';
+  actionLabel: string;
+  actionPath: string;
+}
+
 export const HeaderGreeting: React.FC<{ user: Profile }> = ({ user }) => {
   const navigate = useNavigate();
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const storageKey = `urochallenge_read_notifs_${user.id}`;
+  const [readIds, setReadIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      setReadIds(saved ? JSON.parse(saved) : []);
+    } catch {
+      setReadIds([]);
+    }
+  }, [storageKey]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsNotifOpen(false);
+      }
+    };
+    if (isNotifOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isNotifOpen]);
+
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? '¡Buenos días!' : hour < 19 ? '¡Buenas tardes!' : '¡Buenas noches!';
@@ -29,8 +76,109 @@ export const HeaderGreeting: React.FC<{ user: Profile }> = ({ user }) => {
     .slice(0, 2)
     .join('');
 
+  // Build real application notifications for the user
+  const notifications: AppNotificationItem[] = [];
+  const dailyState = uroRepository.getDailyQuestionState(user.id);
+  const progression = uroRepository.getUserProgression(user.id);
+  const achievements = uroRepository.getUserAutoAchievements(user.id).filter((a) => a.unlocked);
+  const redemptions = uroRepository.getUserRedemptions(user.id);
+
+  if (dailyState.assignment?.status === 'available' && dailyState.question) {
+    notifications.push({
+      id: `notif-daily-${dailyState.assignment.period_key}`,
+      title: '¡Pregunta periódica disponible!',
+      message: `Tienes un desafío clínico pendiente en "${dailyState.category?.name || 'Urología'}". Gana +${dailyState.potentialPoints.participation + dailyState.potentialPoints.correctBonus} pts y +20 XP.`,
+      timeLabel: 'Disponible ahora',
+      type: 'daily',
+      actionLabel: 'Responder pregunta',
+      actionPath: '/app/daily-question',
+    });
+  }
+
+  if (progression.nextLevel) {
+    notifications.push({
+      id: `notif-lvl-prog-${progression.currentLevel.level_number}-${progression.totalXp}`,
+      title: `Nivel ${progression.currentLevel.roman_numeral} — ${progression.currentLevel.name}`,
+      message: `Acumulas ${progression.totalXp} XP (${progression.levelProgressPercentage}%). Te faltan ${progression.xpMissingForNextLevel} XP para alcanzar el rango ${progression.nextLevel.name}.`,
+      timeLabel: 'Progreso RPG',
+      type: 'level',
+      actionLabel: 'Ver mi trayectoria',
+      actionPath: '/app/trajectory',
+    });
+  }
+
+  for (const ach of achievements.slice(0, 2)) {
+    notifications.push({
+      id: `notif-ach-${ach.id}`,
+      title: `Logro desbloqueado: ${ach.name}`,
+      message: ach.description,
+      timeLabel: ach.unlocked_at
+        ? format(new Date(ach.unlocked_at), "d 'de' MMM", { locale: es })
+        : 'Desbloqueado',
+      type: 'achievement',
+      actionLabel: 'Ver insignias',
+      actionPath: '/app/trajectory',
+    });
+  }
+
+  for (const red of redemptions.slice(0, 2)) {
+    const statusLabel =
+      red.status === 'approved'
+        ? 'Aprobado'
+        : red.status === 'delivered'
+          ? 'Entregado'
+          : red.status === 'rejected'
+            ? 'Reembolsado'
+            : 'Pendiente de validación';
+    notifications.push({
+      id: `notif-red-${red.id}-${red.status}`,
+      title: `Canje ${red.redemption_code}: ${statusLabel}`,
+      message: `Premio "${red.reward_name}" (${red.points_spent} pts).`,
+      timeLabel: format(new Date(red.created_at), "d 'de' MMM, HH:mm", { locale: es }),
+      type: 'reward',
+      actionLabel: 'Ver mis premios',
+      actionPath: '/app/rewards',
+    });
+  }
+
+  if (user.reminders_enabled) {
+    notifications.push({
+      id: `notif-study-reminder-${user.reminder_time || '08:30'}`,
+      title: `Recordatorio de estudio (${user.reminder_time || '08:30'} hrs)`,
+      message:
+        'Completa un ciclo de estudio Pomodoro de 25 min para obtener +2 puntos y +40 XP de experiencia.',
+      timeLabel: ' Hábito diario',
+      type: 'study',
+      actionLabel: 'Ir a Pomodoro',
+      actionPath: '/app/study',
+    });
+  }
+
+  const unreadCount = notifications.filter((n) => !readIds.includes(n.id)).length;
+
+  const markAsRead = (id: string) => {
+    if (readIds.includes(id)) return;
+    const updated = [...readIds, id];
+    setReadIds(updated);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(updated));
+    } catch {
+      // ignore storage errors
+    }
+  };
+
+  const markAllAsRead = () => {
+    const allIds = notifications.map((n) => n.id);
+    setReadIds(allIds);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(allIds));
+    } catch {
+      // ignore storage errors
+    }
+  };
+
   return (
-    <header className="flex items-center justify-between mb-5">
+    <header className="flex items-center justify-between mb-5 relative z-30">
       <div className="flex items-center gap-3.5">
         <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#5149B8] to-[#83D0E5] p-0.5 shadow-md">
           <div className="w-full h-full rounded-full bg-white flex items-center justify-center font-extrabold text-[#5149B8] text-sm">
@@ -45,18 +193,138 @@ export const HeaderGreeting: React.FC<{ user: Profile }> = ({ user }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 relative" ref={dropdownRef}>
         <button
           type="button"
-          onClick={() => navigate('/app/study')}
-          title="Recordatorios de Estudio y Pomodoro"
-          className="w-10 h-10 rounded-full bg-white card-soft-shadow flex items-center justify-center text-[#202744] hover:text-[#5149B8] transition relative cursor-pointer"
+          onClick={() => setIsNotifOpen((prev) => !prev)}
+          title="Centro de Notificaciones"
+          aria-expanded={isNotifOpen}
+          className={`w-10 h-10 rounded-full card-soft-shadow flex items-center justify-center transition relative cursor-pointer ${
+            isNotifOpen
+              ? 'bg-[#5149B8] text-white'
+              : 'bg-white text-[#202744] hover:text-[#5149B8]'
+          }`}
         >
           <Bell className="w-4 h-4" />
-          {user.reminders_enabled && (
-            <span className="w-2 h-2 rounded-full bg-rose-500 absolute top-2.5 right-2.5" />
+          {unreadCount > 0 && (
+            <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center absolute -top-0.5 -right-0.5 border-2 border-white">
+              {unreadCount}
+            </span>
           )}
         </button>
+
+        {/* Floating In-App Notification Center Popover */}
+        {isNotifOpen && (
+          <div className="absolute right-0 top-12 w-[330px] sm:w-[390px] bg-white rounded-[28px] shadow-2xl border border-slate-200/90 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="px-5 py-4 bg-gradient-to-r from-[#202744] to-[#5149B8] text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bell className="w-4 h-4 text-[#C3F574]" />
+                <div>
+                  <h3 className="text-sm font-extrabold leading-tight">Notificaciones</h3>
+                  <p className="text-[11px] text-white/75">
+                    {unreadCount > 0
+                      ? `Tienes ${unreadCount} aviso(s) sin leer`
+                      : 'Estás al día con tus avisos'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                {unreadCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={markAllAsRead}
+                    title="Marcar todas como leídas"
+                    className="px-2.5 py-1 rounded-full bg-white/15 hover:bg-white/25 text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                  >
+                    <CheckCheck className="w-3.5 h-3.5 text-[#C3F574]" />
+                    <span>Leer todas</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsNotifOpen(false)}
+                  className="p-1 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-100">
+              {notifications.length === 0 ? (
+                <div className="p-8 text-center text-xs text-[#858BA1]">
+                  No tienes notificaciones en este momento.
+                </div>
+              ) : (
+                notifications.map((item) => {
+                  const isUnread = !readIds.includes(item.id);
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => markAsRead(item.id)}
+                      className={`p-4 transition flex items-start gap-3 ${
+                        isUnread ? 'bg-[#5149B8]/[0.04]' : 'bg-white'
+                      } hover:bg-[#F5F7FC]`}
+                    >
+                      <div
+                        className={`w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 mt-0.5 ${
+                          item.type === 'daily'
+                            ? 'bg-[#5149B8]/15 text-[#5149B8]'
+                            : item.type === 'level'
+                              ? 'bg-amber-100 text-amber-700'
+                              : item.type === 'achievement'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : item.type === 'reward'
+                                  ? 'bg-sky-100 text-sky-700'
+                                  : 'bg-purple-100 text-purple-700'
+                        }`}
+                      >
+                        {item.type === 'daily' && <Sparkles className="w-4 h-4" />}
+                        {item.type === 'level' && <Trophy className="w-4 h-4" />}
+                        {item.type === 'achievement' && <CheckCircle2 className="w-4 h-4" />}
+                        {item.type === 'reward' && <Gift className="w-4 h-4" />}
+                        {item.type === 'study' && <Clock className="w-4 h-4" />}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 mb-0.5">
+                          <span className="text-xs font-extrabold text-[#202744] truncate">
+                            {item.title}
+                          </span>
+                          {isUnread && (
+                            <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+                          )}
+                        </div>
+                        <p className="text-[11px] text-[#858BA1] leading-relaxed mb-2">
+                          {item.message}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-semibold text-slate-400">
+                            {item.timeLabel}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markAsRead(item.id);
+                              setIsNotifOpen(false);
+                              navigate(item.actionPath);
+                            }}
+                            className="text-[11px] font-extrabold text-[#5149B8] hover:underline flex items-center gap-1 cursor-pointer"
+                          >
+                            <span>{item.actionLabel}</span>
+                            <ArrowUpRight className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
+
         <button
           type="button"
           onClick={() => navigate('/app/profile')}
