@@ -67,3 +67,25 @@ VALUES
   ('Racha de 7 días', 'Mantuviste una racha ininterrumpida de 7 días consecutivos.', 'Flame', 'laurel', 'gold', 'streak_days', 7, true),
   ('10 tests completados', 'Completaste 10 evaluaciones de 10 preguntas.', 'Trophy', 'trophy', 'gold', 'quizzes_completed', 10, true),
   ('90% de aciertos en un test', 'Lograste una precisión global igual o superior al 90% con al menos 10 preguntas.', 'Crown', 'laurel', 'gold', 'accuracy_pct_min_10_q', 90, true);
+
+-- =============================================================================
+-- CATEGORÍAS INICIALES DEL DICCIONARIO UROLÓGICO (14 CATEGORÍAS)
+-- =============================================================================
+
+INSERT INTO public.urology_categories (name, slug, description, icon, display_order, is_active)
+VALUES
+  ('Anatomía urológica', 'anatomia-urologica', 'Estructuras anatómicas del aparato urinario y reproductor masculino.', 'Activity', 1, true),
+  ('Fisiología urinaria', 'fisiologia-urinaria', 'Funcionamiento renal, producción de orina y mecanismos urinarios.', 'HeartPulse', 2, true),
+  ('Semiología urológica', 'semiologia-urologica', 'Síntomas, signos y evaluación clínica urológica.', 'Stethoscope', 3, true),
+  ('Infecciones urinarias', 'infecciones-urinarias', 'Infecciones del tracto urinario y conceptos relacionados.', 'ShieldAlert', 4, true),
+  ('Litiasis urinaria', 'litiasis-urinaria', 'Cálculos urinarios y conceptos relacionados.', 'Gem', 5, true),
+  ('Urología oncológica', 'urologia-oncologica', 'Tumores y neoplasias del sistema genitourinario.', 'Microscope', 6, true),
+  ('Próstata', 'prostata', 'Anatomía, patologías y conceptos prostáticos.', 'Layers', 7, true),
+  ('Andrología y salud masculina', 'andrologia-y-salud-masculina', 'Función sexual y salud reproductiva masculina.', 'UserCheck', 8, true),
+  ('Uroginecología e incontinencia', 'uroginecologia-e-incontinencia', 'Incontinencia, suelo pélvico y trastornos urinarios femeninos.', 'Droplets', 9, true),
+  ('Urgencias urológicas', 'urgencias-urologicas', 'Conceptos asociados a situaciones urológicas urgentes.', 'Siren', 10, true),
+  ('Estudios y procedimientos', 'estudios-y-procedimientos', 'Exámenes, procedimientos diagnósticos y técnicas urológicas.', 'ClipboardList', 11, true),
+  ('Farmacología urológica', 'farmacologia-urologica', 'Fármacos de uso frecuente en urología.', 'Pill', 12, true),
+  ('Urología pediátrica', 'urologia-pediatrica', 'Conceptos urológicos en infancia y adolescencia.', 'Baby', 13, true),
+  ('Trasplante y función renal', 'trasplante-y-funcion-renal', 'Conceptos generales sobre función renal y trasplante.', 'RefreshCw', 14, true)
+ON CONFLICT (slug) DO NOTHING;

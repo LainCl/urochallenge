@@ -225,4 +225,99 @@ describe('UroChallenge Domain & Repository Engine', () => {
     expect(loggedIn.id).toBe(created.id);
     expect(uroRepository.getCurrentUser()?.id).toBe(created.id);
   });
+
+  it('9. Diccionario Urológico: carga 14 categorías, 27 términos publicados y ejecuta búsqueda inteligente por abreviaturas y sinónimos', () => {
+    const userId = 'user-demo-01';
+    const categories = uroRepository.getDictionaryCategories(false);
+    expect(categories.length).toBe(14);
+
+    // Regular users only see published terms (27 published out of 29 total)
+    const publishedTerms = uroRepository.getDictionaryTerms({ userId, includeUnpublished: false });
+    expect(publishedTerms.length).toBe(27);
+    expect(publishedTerms.every((t) => t.editorial_status === 'published')).toBe(true);
+
+    // Search by exact abbreviation "HPB" returns Hiperplasia prostática benigna first
+    const hpbSearch = uroRepository.getDictionaryTerms({
+      userId,
+      query: 'HPB',
+      includeUnpublished: false,
+    });
+    expect(hpbSearch.length).toBeGreaterThanOrEqual(1);
+    expect(hpbSearch[0].term).toBe('Hiperplasia prostática benigna');
+
+    // Accent-insensitive search "prostata"
+    const accentSearch = uroRepository.getDictionaryTerms({
+      userId,
+      query: 'prostata',
+      includeUnpublished: false,
+    });
+    expect(accentSearch.some((t) => t.term === 'Próstata')).toBe(true);
+    expect(accentSearch.some((t) => t.term === 'Hiperplasia prostática benigna')).toBe(true);
+
+    // Detail view for Hiperplasia prostática benigna includes its 6 related terms
+    const hpbDetail = uroRepository.getDictionaryTermBySlug(
+      'hiperplasia-prostatica-benigna',
+      userId,
+      false
+    );
+    expect(hpbDetail).not.toBeNull();
+    const relatedNames = hpbDetail!.related_terms.map((r) => r.term);
+    expect(relatedNames).toContain('Próstata');
+    expect(relatedNames).toContain('Antígeno prostático específico');
+    expect(relatedNames).toContain('Síntomas del tracto urinario inferior');
+    expect(relatedNames).toContain('Retención urinaria');
+    expect(relatedNames).toContain('Flujometría');
+    expect(relatedNames).toContain('Tamsulosina');
+  });
+
+  it('10. Diccionario Urológico: gestiona favoritos, historial sin duplicados consecutivos y flujo editorial sin otorgar puntos ni XP por consultar', () => {
+    const userId = 'user-demo-01';
+    const adminId = 'admin-demo-01';
+
+    const initialBalance = uroRepository.getUserBalance(userId);
+    const initialXp = uroRepository.getUserProgression(userId).totalXp;
+
+    // Toggle favorite on "Disuria" (uterm-01)
+    const beforeFavs = uroRepository.getDictionaryTerms({
+      userId,
+      onlyFavorites: true,
+      includeUnpublished: false,
+    });
+    const isFavNow = uroRepository.toggleFavoriteTerm(userId, 'uterm-01');
+    expect(isFavNow).toBe(true);
+
+    const favList = uroRepository.getDictionaryTerms({
+      userId,
+      onlyFavorites: true,
+      includeUnpublished: false,
+    });
+    expect(favList.length).toBe(beforeFavs.length + 1);
+    expect(favList.some((t) => t.id === 'uterm-01')).toBe(true);
+
+    // Record consultation views: consecutive views of the same term do not create consecutive duplicates
+    uroRepository.clearUserTermHistory(userId);
+    uroRepository.recordTermView(userId, 'uterm-01');
+    uroRepository.recordTermView(userId, 'uterm-01');
+    uroRepository.recordTermView(userId, 'uterm-07');
+
+    const history = uroRepository.getUserTermHistory(userId);
+    expect(history.length).toBe(2);
+    expect(history[0].view.term_id).toBe('uterm-07'); // Most recent first
+    expect(history[1].view.term_id).toBe('uterm-01');
+
+    // Viewing dictionary terms must NEVER award points or XP automatically
+    expect(uroRepository.getUserBalance(userId)).toBe(initialBalance);
+    expect(uroRepository.getUserProgression(userId).totalXp).toBe(initialXp);
+
+    // Delete individual history entry and clear history
+    uroRepository.deleteTermHistoryEntry(userId, history[0].view.id);
+    expect(uroRepository.getUserTermHistory(userId).length).toBe(1);
+    uroRepository.clearUserTermHistory(userId);
+    expect(uroRepository.getUserTermHistory(userId).length).toBe(0);
+
+    // Admin publishes a term that was in "review" (uterm-28: Reflujo vesicoureteral)
+    uroRepository.updateDictionaryTermStatus(adminId, 'uterm-28', 'published');
+    const afterPublish = uroRepository.getDictionaryTerms({ userId, includeUnpublished: false });
+    expect(afterPublish.length).toBe(28);
+  });
 });

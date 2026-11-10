@@ -407,6 +407,13 @@ export const QuizResultPage: React.FC = () => {
           </button>
           <button
             type="button"
+            onClick={() => navigate('/app/dictionary')}
+            className="w-full sm:w-auto py-3 px-6 rounded-full bg-[#83D0E5] hover:bg-[#6ec2db] text-[#202744] font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer"
+          >
+            <span>Diccionario Urológico</span>
+          </button>
+          <button
+            type="button"
             onClick={() => navigate('/app/quiz')}
             className="w-full sm:w-auto py-3 px-6 rounded-full bg-[#202744]/40 hover:bg-[#202744]/60 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer"
           >
@@ -473,9 +480,20 @@ export const QuizResultPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-[#F5F7FC] text-xs text-[#202744] leading-relaxed">
-                  <strong className="text-[#5149B8] block mb-0.5">Explicación:</strong>
-                  {q.explanation}
+                <div className="p-3.5 rounded-2xl bg-[#F5F7FC] text-xs text-[#202744] leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <strong className="text-[#5149B8] block mb-0.5">Explicación:</strong>
+                    {q.explanation}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(`/app/dictionary?q=${encodeURIComponent(q.tags[0] || '')}`)
+                    }
+                    className="px-3 py-1.5 rounded-xl bg-white hover:bg-[#5149B8] text-[#5149B8] hover:text-white text-[11px] font-extrabold border border-[#5149B8]/20 transition shrink-0 cursor-pointer self-start sm:self-center"
+                  >
+                    Repasar concepto en Diccionario
+                  </button>
                 </div>
               </div>
             );

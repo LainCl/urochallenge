@@ -12,6 +12,10 @@ import {
   Stethoscope,
   Award,
   BookOpen,
+  ClipboardList,
+  Pill,
+  Baby,
+  RefreshCw,
 } from 'lucide-react';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -27,6 +31,10 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Stethoscope,
   Award,
   BookOpen,
+  ClipboardList,
+  Pill,
+  Baby,
+  RefreshCw,
 };
 
 export const CategoryIcon: React.FC<{ name: string; className?: string }> = ({

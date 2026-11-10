@@ -376,3 +376,110 @@ export interface UserStatsSummary {
   bestStreak: number;
   activeDates: string[];
 }
+
+// ==================== UROLOGY DICTIONARY MODULE ====================
+export interface UrologyDictionaryCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  icon: string;
+  color: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type TermEditorialStatus = 'draft' | 'review' | 'published' | 'archived';
+
+export type TermAliasType = 'synonym' | 'abbreviation' | 'alternative_name';
+
+export interface UrologyTermAlias {
+  id: string;
+  term_id: string;
+  alias: string;
+  alias_type: TermAliasType;
+}
+
+export interface UrologyTermTag {
+  id: string;
+  term_id: string;
+  tag: string;
+}
+
+export interface UrologyTermReference {
+  id: string;
+  term_id: string;
+  reference_title: string;
+  authors: string | null;
+  publication_year: number | null;
+  source_name: string | null;
+  url: string | null;
+  accessed_at: string | null;
+}
+
+export interface UrologyTermRelation {
+  id: string;
+  term_id: string;
+  related_term_id: string;
+  relation_type: string; // default 'related'
+  created_at: string;
+}
+
+export interface UrologyTerm {
+  id: string;
+  term: string;
+  slug: string;
+  short_definition: string;
+  full_definition: string;
+  category_id: string;
+  image_url: string | null;
+  editorial_status: TermEditorialStatus;
+  is_demo_pending_review: boolean;
+  created_by: string;
+  reviewed_by: string | null;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UrologyTermEnriched extends UrologyTerm {
+  category: UrologyDictionaryCategory | null;
+  aliases: UrologyTermAlias[];
+  tags: UrologyTermTag[];
+  references: UrologyTermReference[];
+  related_terms: Array<{
+    id: string;
+    term: string;
+    slug: string;
+    short_definition: string;
+    category_name: string;
+  }>;
+  is_favorite: boolean;
+}
+
+export interface UserFavoriteTerm {
+  id: string;
+  user_id: string;
+  term_id: string;
+  created_at: string;
+}
+
+export interface UserTermView {
+  id: string;
+  user_id: string;
+  term_id: string;
+  viewed_at: string;
+}
+
+export interface DictionaryAdminStats {
+  totalTerms: number;
+  publishedTerms: number;
+  reviewTerms: number;
+  draftTerms: number;
+  archivedTerms: number;
+  totalCategories: number;
+  mostViewedTerms: Array<{ term_id: string; term: string; slug: string; views_count: number }>;
+  mostFavoritedTerms: Array<{ term_id: string; term: string; slug: string; favorites_count: number }>;
+}

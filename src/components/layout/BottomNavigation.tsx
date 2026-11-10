@@ -1,12 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Calendar, Timer, Gift, User } from 'lucide-react';
+import { Home, BookOpen, Timer, Gift, User } from 'lucide-react';
 
 export const BottomNavigation: React.FC = () => {
   const navItems = [
     { to: '/app', label: 'Inicio', icon: Home, end: true },
+    { to: '/app/dictionary', label: 'Diccionario', icon: BookOpen, end: false },
     { to: '/app/study', label: 'Estudio', icon: Timer, end: false },
-    { to: '/app/activity', label: 'Actividad', icon: Calendar, end: false },
     { to: '/app/rewards', label: 'Premios', icon: Gift, end: false },
     { to: '/app/profile', label: 'Perfil', icon: User, end: false },
   ];

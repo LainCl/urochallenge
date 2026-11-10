@@ -12,6 +12,7 @@ import {
   ArrowLeft,
   ShieldCheck,
   Sparkles,
+  BookOpen,
 } from 'lucide-react';
 import { useApp } from '../../app/providers';
 
@@ -55,6 +56,7 @@ export const AdminSidebar: React.FC = () => {
 
   const adminLinks = [
     { to: '/admin', label: 'Resumen General', icon: LayoutDashboard, end: true },
+    { to: '/admin/dictionary', label: 'Diccionario Urológico', icon: BookOpen, end: false },
     { to: '/admin/gamification', label: 'Gamificación (Niveles y XP)', icon: Sparkles, end: false },
     { to: '/admin/questions', label: 'Banco de Preguntas', icon: FileQuestion, end: false },
     { to: '/admin/categories', label: 'Categorías', icon: FolderTree, end: false },

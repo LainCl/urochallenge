@@ -221,6 +221,17 @@ export const DailyQuestionPage: React.FC = () => {
                 )}
                 <button
                   type="button"
+                  onClick={() =>
+                    navigate(
+                      `/app/dictionary?q=${encodeURIComponent(question.tags[0] || '')}`
+                    )
+                  }
+                  className="flex-1 sm:flex-initial py-2.5 px-4 rounded-full bg-[#83D0E5]/25 hover:bg-[#83D0E5]/40 text-[#202744] font-extrabold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                >
+                  <span>Consultar en Diccionario</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => navigate('/app/quiz')}
                   className="flex-1 sm:flex-initial py-2.5 px-5 rounded-full bg-[#5149B8] hover:bg-[#41399e] text-white font-extrabold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                 >

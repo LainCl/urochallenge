@@ -13,6 +13,7 @@ import {
   UserPlus,
   RefreshCw,
   BookOpenCheck,
+  BookOpen,
   Stethoscope,
   Timer,
   Trophy,
@@ -39,6 +40,7 @@ export const AppShell: React.FC = () => {
 
   const navLinks = [
     { to: '/app', label: 'Inicio / Descubrir', icon: Home, end: true },
+    { to: '/app/dictionary', label: 'Diccionario Urológico', icon: BookOpen, end: false },
     { to: '/app/trajectory', label: 'Mi Trayectoria RPG', icon: Trophy, end: false },
     { to: '/app/daily-question', label: 'Pregunta Periódica', icon: Sparkles, end: false },
     { to: '/app/quiz', label: 'Test 10 Preguntas', icon: BookOpenCheck, end: false },

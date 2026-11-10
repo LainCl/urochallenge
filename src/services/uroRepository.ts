@@ -27,6 +27,18 @@ import {
   AchievementDefinition,
   UserAchievementUnlock,
   UserProgressionSummary,
+  UrologyDictionaryCategory,
+  UrologyTerm,
+  UrologyTermAlias,
+  UrologyTermTag,
+  UrologyTermReference,
+  UrologyTermRelation,
+  UrologyTermEnriched,
+  UserFavoriteTerm,
+  UserTermView,
+  TermEditorialStatus,
+  TermAliasType,
+  DictionaryAdminStats,
 } from '../types/domain';
 import {
   DEMO_USERS,
@@ -44,6 +56,14 @@ import {
   INITIAL_DEMO_XP_LEDGER,
   INITIAL_DEMO_LEVEL_HISTORY,
 } from '../data/seedData';
+import {
+  INITIAL_DICTIONARY_CATEGORIES,
+  INITIAL_DICTIONARY_TERMS,
+  INITIAL_DICTIONARY_ALIASES,
+  INITIAL_DICTIONARY_TAGS,
+  INITIAL_DICTIONARY_REFERENCES,
+  INITIAL_DICTIONARY_RELATIONS,
+} from '../data/dictionarySeedData';
 import { format, differenceInCalendarDays, addHours, addDays, parseISO } from 'date-fns';
 
 const STORAGE_KEY = 'urochallenge_db_v1';
@@ -70,6 +90,14 @@ export interface LocalDatabaseState {
   userLevelHistory: UserLevelHistoryEntry[];
   achievements: AchievementDefinition[];
   userAchievements: UserAchievementUnlock[];
+  dictionaryCategories: UrologyDictionaryCategory[];
+  dictionaryTerms: UrologyTerm[];
+  dictionaryAliases: UrologyTermAlias[];
+  dictionaryTags: UrologyTermTag[];
+  dictionaryReferences: UrologyTermReference[];
+  dictionaryRelations: UrologyTermRelation[];
+  userFavoriteTerms: UserFavoriteTerm[];
+  userTermViews: UserTermView[];
   appSettings: AppSettings;
   auditLogs: AdminAuditLog[];
 }
@@ -181,6 +209,40 @@ function getInitialDatabaseState(): LocalDatabaseState {
         unlocked_at: '2026-11-08T18:10:00Z',
       },
     ],
+    dictionaryCategories: INITIAL_DICTIONARY_CATEGORIES,
+    dictionaryTerms: INITIAL_DICTIONARY_TERMS,
+    dictionaryAliases: INITIAL_DICTIONARY_ALIASES,
+    dictionaryTags: INITIAL_DICTIONARY_TAGS,
+    dictionaryReferences: INITIAL_DICTIONARY_REFERENCES,
+    dictionaryRelations: INITIAL_DICTIONARY_RELATIONS,
+    userFavoriteTerms: [
+      {
+        id: 'ufav-seed-1',
+        user_id: 'user-demo-01',
+        term_id: 'uterm-11',
+        created_at: '2026-11-08T19:00:00Z',
+      },
+      {
+        id: 'ufav-seed-2',
+        user_id: 'user-demo-01',
+        term_id: 'uterm-14',
+        created_at: '2026-11-08T19:05:00Z',
+      },
+    ],
+    userTermViews: [
+      {
+        id: 'uview-seed-1',
+        user_id: 'user-demo-01',
+        term_id: 'uterm-11',
+        viewed_at: '2026-11-09T10:15:00Z',
+      },
+      {
+        id: 'uview-seed-2',
+        user_id: 'user-demo-01',
+        term_id: 'uterm-04',
+        viewed_at: '2026-11-09T10:18:00Z',
+      },
+    ],
     appSettings: INITIAL_APP_SETTINGS,
     auditLogs: [
       {
@@ -254,6 +316,41 @@ class UroChallengeRepository {
       }
       if (!Array.isArray(parsed.userAchievements)) {
         parsed.userAchievements = [];
+        migrated = true;
+      }
+      if (
+        !Array.isArray(parsed.dictionaryCategories) ||
+        parsed.dictionaryCategories.length === 0
+      ) {
+        parsed.dictionaryCategories = INITIAL_DICTIONARY_CATEGORIES;
+        migrated = true;
+      }
+      if (!Array.isArray(parsed.dictionaryTerms) || parsed.dictionaryTerms.length === 0) {
+        parsed.dictionaryTerms = INITIAL_DICTIONARY_TERMS;
+        migrated = true;
+      }
+      if (!Array.isArray(parsed.dictionaryAliases)) {
+        parsed.dictionaryAliases = INITIAL_DICTIONARY_ALIASES;
+        migrated = true;
+      }
+      if (!Array.isArray(parsed.dictionaryTags)) {
+        parsed.dictionaryTags = INITIAL_DICTIONARY_TAGS;
+        migrated = true;
+      }
+      if (!Array.isArray(parsed.dictionaryReferences)) {
+        parsed.dictionaryReferences = INITIAL_DICTIONARY_REFERENCES;
+        migrated = true;
+      }
+      if (!Array.isArray(parsed.dictionaryRelations)) {
+        parsed.dictionaryRelations = INITIAL_DICTIONARY_RELATIONS;
+        migrated = true;
+      }
+      if (!Array.isArray(parsed.userFavoriteTerms)) {
+        parsed.userFavoriteTerms = [];
+        migrated = true;
+      }
+      if (!Array.isArray(parsed.userTermViews)) {
+        parsed.userTermViews = [];
         migrated = true;
       }
       for (const seedRule of INITIAL_POINT_RULES) {
@@ -2367,6 +2464,667 @@ class UroChallengeRepository {
 
     this.saveDb(db);
     return res.entry;
+  }
+
+  // ==================== UROLOGY DICTIONARY MODULE ====================
+  public normalizeSearchText(text: string): string {
+    return (text || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+  }
+
+  public slugifyText(text: string): string {
+    return this.normalizeSearchText(text)
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
+  public getDictionaryCategories(includeInactive = false): UrologyDictionaryCategory[] {
+    const db = this.loadDb();
+    return (db.dictionaryCategories || INITIAL_DICTIONARY_CATEGORIES)
+      .filter((c) => includeInactive || c.is_active)
+      .sort((a, b) => a.display_order - b.display_order);
+  }
+
+  private enrichTerm(
+    db: LocalDatabaseState,
+    term: UrologyTerm,
+    userId?: string,
+    includeUnpublishedRelations = false
+  ): UrologyTermEnriched {
+    const category =
+      (db.dictionaryCategories || []).find((c) => c.id === term.category_id) || null;
+    const aliases = (db.dictionaryAliases || []).filter((a) => a.term_id === term.id);
+    const tags = (db.dictionaryTags || []).filter((t) => t.term_id === term.id);
+    const references = (db.dictionaryReferences || []).filter((r) => r.term_id === term.id);
+
+    // Bidirectional relation resolution (term_id -> related_term_id OR related_term_id -> term_id)
+    const relIds = new Set<string>();
+    for (const rel of db.dictionaryRelations || []) {
+      if (rel.term_id === term.id && rel.related_term_id !== term.id) {
+        relIds.add(rel.related_term_id);
+      } else if (rel.related_term_id === term.id && rel.term_id !== term.id) {
+        relIds.add(rel.term_id);
+      }
+    }
+
+    const related_terms: UrologyTermEnriched['related_terms'] = [];
+    for (const rId of relIds) {
+      const rTerm = (db.dictionaryTerms || []).find((t) => t.id === rId);
+      if (
+        rTerm &&
+        (includeUnpublishedRelations || rTerm.editorial_status === 'published')
+      ) {
+        const rCat = (db.dictionaryCategories || []).find((c) => c.id === rTerm.category_id);
+        related_terms.push({
+          id: rTerm.id,
+          term: rTerm.term,
+          slug: rTerm.slug,
+          short_definition: rTerm.short_definition,
+          category_name: rCat?.name || 'Urología',
+        });
+      }
+    }
+
+    const is_favorite = userId
+      ? (db.userFavoriteTerms || []).some(
+          (f) => f.user_id === userId && f.term_id === term.id
+        )
+      : false;
+
+    return {
+      ...term,
+      category,
+      aliases,
+      tags,
+      references,
+      related_terms,
+      is_favorite,
+    };
+  }
+
+  public getDictionaryTerms(params?: {
+    userId?: string;
+    includeUnpublished?: boolean;
+    categoryId?: string | null;
+    statusFilter?: TermEditorialStatus | 'all';
+    query?: string;
+    onlyFavorites?: boolean;
+  }): UrologyTermEnriched[] {
+    const db = this.loadDb();
+    const userId = params?.userId;
+    const includeUnpublished = Boolean(params?.includeUnpublished);
+    const categoryId = params?.categoryId || null;
+    const statusFilter = params?.statusFilter || 'all';
+    const rawQuery = params?.query || '';
+    const normQuery = this.normalizeSearchText(rawQuery);
+    const onlyFavorites = Boolean(params?.onlyFavorites);
+
+    const activeCatIds = new Set(
+      (db.dictionaryCategories || [])
+        .filter((c) => includeUnpublished || c.is_active)
+        .map((c) => c.id)
+    );
+
+    const favTermIds = new Set(
+      userId
+        ? (db.userFavoriteTerms || [])
+            .filter((f) => f.user_id === userId)
+            .map((f) => f.term_id)
+        : []
+    );
+
+    const candidates = (db.dictionaryTerms || []).filter((t) => {
+      if (!includeUnpublished && t.editorial_status !== 'published') return false;
+      if (!includeUnpublished && !activeCatIds.has(t.category_id)) return false;
+      if (statusFilter !== 'all' && t.editorial_status !== statusFilter) return false;
+      if (categoryId && t.category_id !== categoryId) return false;
+      if (onlyFavorites && !favTermIds.has(t.id)) return false;
+      return true;
+    });
+
+    const enriched = candidates.map((t) =>
+      this.enrichTerm(db, t, userId, includeUnpublished)
+    );
+
+    if (!normQuery) {
+      return enriched.sort((a, b) => a.term.localeCompare(b.term, 'es'));
+    }
+
+    // Smart relevance scoring (accent-insensitive, case-insensitive, prioritizes exact/abbreviation/prefix matches)
+    const scored: Array<{ item: UrologyTermEnriched; score: number }> = [];
+
+    for (const item of enriched) {
+      const normTerm = this.normalizeSearchText(item.term);
+      const normAliases = item.aliases.map((a) => this.normalizeSearchText(a.alias));
+      const normTags = item.tags.map((tg) => this.normalizeSearchText(tg.tag));
+      const normShort = this.normalizeSearchText(item.short_definition);
+      const normFull = this.normalizeSearchText(item.full_definition);
+
+      let score = 0;
+
+      if (normTerm === normQuery) {
+        score += 100;
+      } else if (normAliases.some((a) => a === normQuery)) {
+        score += 95; // Exact abbreviation or synonym match (e.g. "HPB", "PSA", "STUI")
+      } else if (normTerm.startsWith(normQuery)) {
+        score += 80;
+      } else if (normAliases.some((a) => a.startsWith(normQuery))) {
+        score += 75;
+      } else if (normTerm.includes(normQuery)) {
+        score += 60;
+      } else if (normAliases.some((a) => a.includes(normQuery))) {
+        score += 55;
+      }
+
+      if (normTags.some((tg) => tg.includes(normQuery))) {
+        score += 35;
+      }
+      if (normShort.includes(normQuery)) {
+        score += 25;
+      }
+      if (normFull.includes(normQuery)) {
+        score += 15;
+      }
+
+      if (score > 0) {
+        scored.push({ item, score });
+      }
+    }
+
+    return scored
+      .sort((a, b) =>
+        b.score !== a.score ? b.score - a.score : a.item.term.localeCompare(b.item.term, 'es')
+      )
+      .map((s) => s.item);
+  }
+
+  public getDictionaryTermBySlug(
+    slug: string,
+    userId?: string,
+    allowUnpublished = false
+  ): UrologyTermEnriched | null {
+    const db = this.loadDb();
+    const cleanSlug = slug.trim().toLowerCase();
+    const found = (db.dictionaryTerms || []).find(
+      (t) => t.slug.toLowerCase() === cleanSlug || t.id === slug
+    );
+    if (!found) return null;
+    if (!allowUnpublished && found.editorial_status !== 'published') {
+      return null;
+    }
+    return this.enrichTerm(db, found, userId, allowUnpublished);
+  }
+
+  public toggleFavoriteTerm(userId: string, termId: string): boolean {
+    const db = this.loadDb();
+    if (!Array.isArray(db.userFavoriteTerms)) {
+      db.userFavoriteTerms = [];
+    }
+    const existingIdx = db.userFavoriteTerms.findIndex(
+      (f) => f.user_id === userId && f.term_id === termId
+    );
+    if (existingIdx >= 0) {
+      db.userFavoriteTerms.splice(existingIdx, 1);
+      this.saveDb(db);
+      return false;
+    } else {
+      db.userFavoriteTerms.push({
+        id: `ufav-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        user_id: userId,
+        term_id: termId,
+        created_at: new Date().toISOString(),
+      });
+      this.saveDb(db);
+      return true;
+    }
+  }
+
+  public recordTermView(userId: string, termId: string): UserTermView {
+    const db = this.loadDb();
+    if (!Array.isArray(db.userTermViews)) {
+      db.userTermViews = [];
+    }
+    const now = new Date().toISOString();
+
+    // Sort user views descending to check if the most recent view is already this exact term
+    const userViews = db.userTermViews
+      .filter((v) => v.user_id === userId)
+      .sort((a, b) => new Date(b.viewed_at).getTime() - new Date(a.viewed_at).getTime());
+
+    if (userViews.length > 0 && userViews[0].term_id === termId) {
+      // Avoid consecutive duplicate entry: update timestamp of most recent view
+      userViews[0].viewed_at = now;
+      this.saveDb(db);
+      return userViews[0];
+    }
+
+    const newView: UserTermView = {
+      id: `uview-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      user_id: userId,
+      term_id: termId,
+      viewed_at: now,
+    };
+    db.userTermViews.unshift(newView);
+    this.saveDb(db);
+    return newView;
+  }
+
+  public getUserTermHistory(
+    userId: string
+  ): Array<{ view: UserTermView; term: UrologyTermEnriched }> {
+    const db = this.loadDb();
+    const views = (db.userTermViews || [])
+      .filter((v) => v.user_id === userId)
+      .sort((a, b) => new Date(b.viewed_at).getTime() - new Date(a.viewed_at).getTime());
+
+    const result: Array<{ view: UserTermView; term: UrologyTermEnriched }> = [];
+    for (const v of views) {
+      const t = (db.dictionaryTerms || []).find(
+        (item) => item.id === v.term_id && item.editorial_status === 'published'
+      );
+      if (t) {
+        result.push({
+          view: v,
+          term: this.enrichTerm(db, t, userId, false),
+        });
+      }
+    }
+    return result;
+  }
+
+  public deleteTermHistoryEntry(userId: string, viewId: string): void {
+    const db = this.loadDb();
+    db.userTermViews = (db.userTermViews || []).filter(
+      (v) => !(v.id === viewId && v.user_id === userId)
+    );
+    this.saveDb(db);
+  }
+
+  public clearUserTermHistory(userId: string): void {
+    const db = this.loadDb();
+    db.userTermViews = (db.userTermViews || []).filter((v) => v.user_id !== userId);
+    this.saveDb(db);
+  }
+
+  // ==================== ADMIN DICTIONARY MANAGEMENT ====================
+  public getDictionaryAdminStats(): DictionaryAdminStats {
+    const db = this.loadDb();
+    const terms = db.dictionaryTerms || [];
+    const views = db.userTermViews || [];
+    const favs = db.userFavoriteTerms || [];
+
+    const viewCounts = new Map<string, number>();
+    for (const v of views) {
+      viewCounts.set(v.term_id, (viewCounts.get(v.term_id) || 0) + 1);
+    }
+
+    const favCounts = new Map<string, number>();
+    for (const f of favs) {
+      favCounts.set(f.term_id, (favCounts.get(f.term_id) || 0) + 1);
+    }
+
+    const mostViewedTerms = terms
+      .map((t) => ({
+        term_id: t.id,
+        term: t.term,
+        slug: t.slug,
+        views_count: viewCounts.get(t.id) || 0,
+      }))
+      .filter((x) => x.views_count > 0)
+      .sort((a, b) => b.views_count - a.views_count)
+      .slice(0, 5);
+
+    const mostFavoritedTerms = terms
+      .map((t) => ({
+        term_id: t.id,
+        term: t.term,
+        slug: t.slug,
+        favorites_count: favCounts.get(t.id) || 0,
+      }))
+      .filter((x) => x.favorites_count > 0)
+      .sort((a, b) => b.favorites_count - a.favorites_count)
+      .slice(0, 5);
+
+    return {
+      totalTerms: terms.length,
+      publishedTerms: terms.filter((t) => t.editorial_status === 'published').length,
+      reviewTerms: terms.filter((t) => t.editorial_status === 'review').length,
+      draftTerms: terms.filter((t) => t.editorial_status === 'draft').length,
+      archivedTerms: terms.filter((t) => t.editorial_status === 'archived').length,
+      totalCategories: (db.dictionaryCategories || []).length,
+      mostViewedTerms,
+      mostFavoritedTerms,
+    };
+  }
+
+  public saveDictionaryCategory(
+    adminId: string,
+    data: Omit<UrologyDictionaryCategory, 'id' | 'created_at' | 'updated_at'> & { id?: string }
+  ): UrologyDictionaryCategory {
+    if (!data.name.trim()) {
+      throw new Error('El nombre de la categoría es obligatorio.');
+    }
+    const db = this.loadDb();
+    const now = new Date().toISOString();
+    const slug = data.slug?.trim() ? this.slugifyText(data.slug) : this.slugifyText(data.name);
+
+    const duplicateSlug = db.dictionaryCategories.find(
+      (c) => c.slug === slug && c.id !== data.id
+    );
+    if (duplicateSlug) {
+      throw new Error(`Ya existe una categoría en el diccionario con el slug "${slug}".`);
+    }
+
+    if (data.id) {
+      const idx = db.dictionaryCategories.findIndex((c) => c.id === data.id);
+      if (idx === -1) throw new Error('Categoría de diccionario no encontrada.');
+      db.dictionaryCategories[idx] = {
+        ...db.dictionaryCategories[idx],
+        ...data,
+        id: data.id,
+        slug,
+        updated_at: now,
+      };
+      this.logAdminAction(
+        db,
+        adminId,
+        'UPDATE_DICTIONARY_CATEGORY',
+        'urology_category',
+        data.id,
+        `Categoría de diccionario "${data.name}" actualizada.`
+      );
+      this.saveDb(db);
+      return db.dictionaryCategories[idx];
+    } else {
+      const created: UrologyDictionaryCategory = {
+        ...data,
+        id: `ucat-${Date.now()}`,
+        slug,
+        created_at: now,
+        updated_at: now,
+      };
+      db.dictionaryCategories.push(created);
+      this.logAdminAction(
+        db,
+        adminId,
+        'CREATE_DICTIONARY_CATEGORY',
+        'urology_category',
+        created.id,
+        `Categoría de diccionario "${created.name}" creada.`
+      );
+      this.saveDb(db);
+      return created;
+    }
+  }
+
+  public saveDictionaryTerm(
+    adminId: string,
+    payload: {
+      id?: string;
+      term: string;
+      slug?: string;
+      short_definition: string;
+      full_definition: string;
+      category_id: string;
+      image_url: string | null;
+      editorial_status: TermEditorialStatus;
+      is_demo_pending_review?: boolean;
+      aliases: Array<{ alias: string; alias_type: TermAliasType }>;
+      tags: string[];
+      references: Array<Omit<UrologyTermReference, 'id' | 'term_id'>>;
+      related_term_ids: string[];
+    }
+  ): UrologyTermEnriched {
+    if (!payload.term.trim()) {
+      throw new Error('El nombre del término es obligatorio.');
+    }
+    if (!payload.short_definition.trim()) {
+      throw new Error('La definición breve es obligatoria.');
+    }
+    if (!payload.category_id) {
+      throw new Error('La categoría del término es obligatoria.');
+    }
+
+    if (payload.image_url && payload.image_url.trim()) {
+      try {
+        new URL(payload.image_url.trim());
+      } catch {
+        throw new Error('La URL de la imagen opcional no tiene un formato válido (https://...).');
+      }
+    }
+
+    for (const ref of payload.references) {
+      if (ref.url && ref.url.trim()) {
+        try {
+          new URL(ref.url.trim());
+        } catch {
+          throw new Error(`La URL de la referencia "${ref.reference_title}" no es válida.`);
+        }
+      }
+    }
+
+    const db = this.loadDb();
+    const now = new Date().toISOString();
+    const slug = payload.slug?.trim()
+      ? this.slugifyText(payload.slug)
+      : this.slugifyText(payload.term);
+
+    if (!slug) {
+      throw new Error('El slug generado no es válido.');
+    }
+
+    const existingSlug = db.dictionaryTerms.find(
+      (t) => t.slug.toLowerCase() === slug.toLowerCase() && t.id !== payload.id
+    );
+    if (existingSlug) {
+      throw new Error(`El slug "${slug}" ya está siendo utilizado por el término "${existingSlug.term}".`);
+    }
+
+    let termRecord: UrologyTerm;
+
+    if (payload.id) {
+      const idx = db.dictionaryTerms.findIndex((t) => t.id === payload.id);
+      if (idx === -1) throw new Error('Término no encontrado.');
+      const prev = db.dictionaryTerms[idx];
+      termRecord = {
+        ...prev,
+        term: payload.term.trim(),
+        slug,
+        short_definition: payload.short_definition.trim(),
+        full_definition: payload.full_definition.trim(),
+        category_id: payload.category_id,
+        image_url: payload.image_url?.trim() || null,
+        editorial_status: payload.editorial_status,
+        is_demo_pending_review:
+          payload.editorial_status === 'published'
+            ? false
+            : (payload.is_demo_pending_review ?? prev.is_demo_pending_review),
+        reviewed_by:
+          payload.editorial_status === 'published' ? adminId : prev.reviewed_by,
+        published_at:
+          payload.editorial_status === 'published' && !prev.published_at
+            ? now
+            : prev.published_at,
+        updated_at: now,
+      };
+      db.dictionaryTerms[idx] = termRecord;
+      this.logAdminAction(
+        db,
+        adminId,
+        'UPDATE_DICTIONARY_TERM',
+        'urology_term',
+        termRecord.id,
+        `Término "${termRecord.term}" actualizado (estado: ${termRecord.editorial_status}).`
+      );
+    } else {
+      const newId = `uterm-${Date.now()}`;
+      termRecord = {
+        id: newId,
+        term: payload.term.trim(),
+        slug,
+        short_definition: payload.short_definition.trim(),
+        full_definition: payload.full_definition.trim(),
+        category_id: payload.category_id,
+        image_url: payload.image_url?.trim() || null,
+        editorial_status: payload.editorial_status,
+        is_demo_pending_review: payload.is_demo_pending_review ?? false,
+        created_by: adminId,
+        reviewed_by: payload.editorial_status === 'published' ? adminId : null,
+        published_at: payload.editorial_status === 'published' ? now : null,
+        created_at: now,
+        updated_at: now,
+      };
+      db.dictionaryTerms.unshift(termRecord);
+      this.logAdminAction(
+        db,
+        adminId,
+        'CREATE_DICTIONARY_TERM',
+        'urology_term',
+        termRecord.id,
+        `Término "${termRecord.term}" creado (estado: ${termRecord.editorial_status}).`
+      );
+    }
+
+    // Replace aliases (deduplicated)
+    db.dictionaryAliases = db.dictionaryAliases.filter((a) => a.term_id !== termRecord.id);
+    const seenAliases = new Set<string>();
+    for (const al of payload.aliases) {
+      const cleanAlias = al.alias.trim();
+      const normAl = this.normalizeSearchText(cleanAlias);
+      if (cleanAlias && !seenAliases.has(`${al.alias_type}:${normAl}`)) {
+        seenAliases.add(`${al.alias_type}:${normAl}`);
+        db.dictionaryAliases.push({
+          id: `ualias-${termRecord.id}-${seenAliases.size}-${Date.now()}`,
+          term_id: termRecord.id,
+          alias: cleanAlias,
+          alias_type: al.alias_type,
+        });
+      }
+    }
+
+    // Replace tags (deduplicated)
+    db.dictionaryTags = db.dictionaryTags.filter((t) => t.term_id !== termRecord.id);
+    const seenTags = new Set<string>();
+    for (const tg of payload.tags) {
+      const cleanTag = tg.trim();
+      const normTg = this.normalizeSearchText(cleanTag);
+      if (cleanTag && !seenTags.has(normTg)) {
+        seenTags.add(normTg);
+        db.dictionaryTags.push({
+          id: `utag-${termRecord.id}-${seenTags.size}-${Date.now()}`,
+          term_id: termRecord.id,
+          tag: cleanTag,
+        });
+      }
+    }
+
+    // Replace references
+    db.dictionaryReferences = db.dictionaryReferences.filter((r) => r.term_id !== termRecord.id);
+    payload.references.forEach((ref, idx) => {
+      if (ref.reference_title.trim()) {
+        db.dictionaryReferences.push({
+          id: `uref-${termRecord.id}-${idx + 1}-${Date.now()}`,
+          term_id: termRecord.id,
+          reference_title: ref.reference_title.trim(),
+          authors: ref.authors?.trim() || null,
+          publication_year: ref.publication_year || null,
+          source_name: ref.source_name?.trim() || null,
+          url: ref.url?.trim() || null,
+          accessed_at: ref.accessed_at || null,
+        });
+      }
+    });
+
+    // Replace outgoing relations (prevent self-relation & duplicates)
+    db.dictionaryRelations = db.dictionaryRelations.filter(
+      (r) => r.term_id !== termRecord.id
+    );
+    const uniqueRelated = new Set(
+      payload.related_term_ids.filter((rid) => rid && rid !== termRecord.id)
+    );
+    for (const rid of uniqueRelated) {
+      db.dictionaryRelations.push({
+        id: `urel-${termRecord.id}-${rid}`,
+        term_id: termRecord.id,
+        related_term_id: rid,
+        relation_type: 'related',
+        created_at: now,
+      });
+    }
+
+    this.saveDb(db);
+    return this.enrichTerm(db, termRecord, adminId, true);
+  }
+
+  public duplicateDictionaryTerm(adminId: string, termId: string): UrologyTermEnriched {
+    const db = this.loadDb();
+    const orig = db.dictionaryTerms.find((t) => t.id === termId);
+    if (!orig) throw new Error('Término original no encontrado.');
+
+    const enrichedOrig = this.enrichTerm(db, orig, adminId, true);
+    const copyName = `${orig.term} (Copia)`;
+    const copySlug = `${orig.slug}-copia-${Date.now().toString().slice(-4)}`;
+
+    return this.saveDictionaryTerm(adminId, {
+      term: copyName,
+      slug: copySlug,
+      short_definition: orig.short_definition,
+      full_definition: orig.full_definition,
+      category_id: orig.category_id,
+      image_url: orig.image_url,
+      editorial_status: 'draft',
+      is_demo_pending_review: true,
+      aliases: enrichedOrig.aliases.map((a) => ({
+        alias: a.alias,
+        alias_type: a.alias_type,
+      })),
+      tags: enrichedOrig.tags.map((t) => t.tag),
+      references: enrichedOrig.references.map((r) => ({
+        reference_title: r.reference_title,
+        authors: r.authors,
+        publication_year: r.publication_year,
+        source_name: r.source_name,
+        url: r.url,
+        accessed_at: r.accessed_at,
+      })),
+      related_term_ids: enrichedOrig.related_terms.map((rt) => rt.id),
+    });
+  }
+
+  public updateDictionaryTermStatus(
+    adminId: string,
+    termId: string,
+    status: TermEditorialStatus
+  ): UrologyTermEnriched {
+    const db = this.loadDb();
+    const idx = db.dictionaryTerms.findIndex((t) => t.id === termId);
+    if (idx === -1) throw new Error('Término no encontrado.');
+
+    const now = new Date().toISOString();
+    db.dictionaryTerms[idx].editorial_status = status;
+    db.dictionaryTerms[idx].updated_at = now;
+    if (status === 'published') {
+      db.dictionaryTerms[idx].published_at = now;
+      db.dictionaryTerms[idx].reviewed_by = adminId;
+      db.dictionaryTerms[idx].is_demo_pending_review = false;
+    }
+
+    this.logAdminAction(
+      db,
+      adminId,
+      'CHANGE_DICTIONARY_TERM_STATUS',
+      'urology_term',
+      termId,
+      `Estado editorial de "${db.dictionaryTerms[idx].term}" cambiado a "${status}".`
+    );
+
+    this.saveDb(db);
+    return this.enrichTerm(db, db.dictionaryTerms[idx], adminId, true);
   }
 }
 

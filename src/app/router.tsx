@@ -22,6 +22,10 @@ import {
 import { TrajectoryPage } from '../features/profile/TrajectoryPage';
 import { StudyPomodoroPage } from '../features/study/StudyPomodoroPage';
 import {
+  DictionaryMainPage,
+  DictionaryTermDetailPage,
+} from '../features/dictionary/DictionaryPages';
+import {
   AdminDashboardPage,
   AdminQuestionsListPage,
   AdminQuestionFormPage,
@@ -35,6 +39,7 @@ import {
   AdminAuditPage,
 } from '../features/admin/AdminManagementPages';
 import { AdminGamificationPage } from '../features/admin/AdminGamificationPage';
+import { AdminDictionaryPage } from '../features/admin/AdminDictionaryPage';
 
 const ProtectedUserRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useApp();
@@ -62,6 +67,8 @@ export const AppRouter: React.FC = () => {
         }
       >
         <Route index element={<HomePage />} />
+        <Route path="dictionary" element={<DictionaryMainPage />} />
+        <Route path="dictionary/:slug" element={<DictionaryTermDetailPage />} />
         <Route path="trajectory" element={<TrajectoryPage />} />
         <Route path="daily-question" element={<DailyQuestionPage />} />
         <Route path="quiz" element={<QuizIntroPage />} />
@@ -84,6 +91,7 @@ export const AppRouter: React.FC = () => {
         }
       >
         <Route index element={<AdminDashboardPage />} />
+        <Route path="dictionary" element={<AdminDictionaryPage />} />
         <Route path="gamification" element={<AdminGamificationPage />} />
         <Route path="questions" element={<AdminQuestionsListPage />} />
         <Route path="questions/new" element={<AdminQuestionFormPage />} />

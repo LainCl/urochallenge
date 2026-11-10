@@ -47,8 +47,9 @@ La arquitectura está desacoplada a través del repositorio `src/services/uroRep
 
 1. Crea un proyecto en [Supabase](https://supabase.com/).
 2. Abre el **SQL Editor** de Supabase y ejecuta en orden:
-   - `supabase/migrations/001_initial_schema.sql` (crea las 16 tablas del modelo, vistas seguras que ocultan `is_correct` al cliente, políticas Row Level Security y la función transaccional `redeem_reward_secure`).
-   - `supabase/seed.sql` (inserta las reglas de puntuación iniciales, las 9 categorías urológicas y los premios de demostración).
+   - `supabase/migrations/001_initial_schema.sql` (crea las tablas base del modelo, vistas seguras que ocultan `is_correct` al cliente, políticas Row Level Security y la función transaccional `redeem_reward_secure`).
+   - `supabase/migrations/002_urology_dictionary.sql` (crea las 8 tablas del módulo **Diccionario Urológico** y sus políticas Row Level Security).
+   - `supabase/seed.sql` (inserta las reglas de puntuación iniciales, las 9 categorías urológicas, los niveles RPG, las 14 categorías del Diccionario Urológico y los premios de demostración).
 3. Copia el archivo `.env.example` a `.env` en la raíz del proyecto y completa tus credenciales:
    ```env
    VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
@@ -75,8 +76,15 @@ La arquitectura está desacoplada a través del repositorio `src/services/uroRep
   - **Tarjeta destacada `"Mi progreso"` en Dashboard y Perfil:** muestra insignia del nivel actual, numeral romano, XP acumulados, barra de progreso animada, porcentaje de avance y XP restantes para el próximo nivel.
   - **Notificación emergente de subida de nivel (`LevelUpNotificationModal`):** detecta automáticamente cuando el usuario alcanza uno o varios niveles nuevos, registra la fecha en `user_level_history` y despliega un modal de felicitación con la nueva insignia desbloqueada.
   - **Pantalla `"Mi trayectoria"` (`/app/trajectory`):** línea de tiempo vertical con los 5 niveles RPG (estado Completado, Nivel Actual o Bloqueado), insignias automáticas por logros (`achievements` / `user_achievements`) y libro mayor de experiencia (`experience_ledger`).
+- **Diccionario Urológico (`/app/dictionary`, `/app/dictionary/:slug`, `/admin/dictionary`):**
+  - Biblioteca de consulta académica con **14 categorías urológicas** y **27+ términos médicos iniciales** con bibliografía verificable.
+  - **Buscador inteligente con debounce y resaltado:** busca por término, abreviaturas (`HPB`, `APE`, `STUI`, `ITU`, `DE`, `LEC`), sinónimos, definición breve, explicación ampliada y etiquetas (insensible a mayúsculas y tildes).
+  - **Ficha detallada de término (`/app/dictionary/:slug`):** definición breve, explicación ampliada, sinónimos/abreviaturas, fuentes bibliográficas verificables, navegación directa entre términos relacionados, copiar definición y compartir enlace.
+  - **Favoritos e historial reciente por usuario:** pestañas dedicadas para guardar términos favoritos (`user_favorite_terms`) y revisar el historial de consultas (`user_term_views`) con opción de eliminar elementos o vaciar historial.
+  - **Panel administrativo editorial (`/admin/dictionary`):** dashboard de métricas del diccionario, CRUD completo con vista previa en vivo, duplicación de términos, flujo editorial (`draft`, `review`, `published`, `archived`) y gestor de las 14 categorías.
 - **Panel Administrativo Protegido (`/admin/*`):**
   - Dashboard de métricas (`/admin`).
+  - **Módulo de Diccionario Urológico (`/admin/dictionary`):** gestión integral de términos, sinónimos, abreviaturas, referencias bibliográficas, relaciones clínicas y estados editoriales.
   - **Módulo de Gamificación (`/admin/gamification`):** creación y edición de niveles RPG, configuración de reglas de XP por actividad, gestión de logros automáticos e inspección/ajuste auditado de XP por usuario.
   - CRUD completo de preguntas con soporte de 2 a 6 alternativas, duplicación y publicación/archivo (`/admin/questions`, `/admin/questions/new`, `/admin/questions/:id`).
   - CRUD de categorías urológicas (`/admin/categories`).

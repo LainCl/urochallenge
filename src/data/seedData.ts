@@ -1066,22 +1066,33 @@ export const INITIAL_DEMO_LEDGER: PointsLedgerEntry[] = [
   },
 ];
 
+const getRelativeIsoDate = (daysOffset: number): string => {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + daysOffset);
+  return d.toISOString().slice(0, 10);
+};
+
 export const INITIAL_DEMO_STREAKS: UserStreak[] = [
   {
     user_id: 'user-demo-01',
     current_streak: 2,
     best_streak: 4,
-    last_activity_date: '2026-11-08',
-    active_dates: ['2026-11-03', '2026-11-04', '2026-11-07', '2026-11-08'],
-    updated_at: '2026-11-08T18:10:00Z',
+    last_activity_date: getRelativeIsoDate(-1),
+    active_dates: [
+      getRelativeIsoDate(-6),
+      getRelativeIsoDate(-5),
+      getRelativeIsoDate(-2),
+      getRelativeIsoDate(-1),
+    ],
+    updated_at: new Date().toISOString(),
   },
   {
     user_id: 'admin-demo-01',
     current_streak: 1,
     best_streak: 5,
-    last_activity_date: '2026-11-08',
-    active_dates: ['2026-11-08'],
-    updated_at: '2026-11-08T10:00:00Z',
+    last_activity_date: getRelativeIsoDate(-1),
+    active_dates: [getRelativeIsoDate(-1)],
+    updated_at: new Date().toISOString(),
   },
 ];
 
