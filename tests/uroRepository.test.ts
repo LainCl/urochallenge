@@ -7,13 +7,17 @@ describe('UroChallenge Domain & Repository Engine', () => {
     uroRepository.resetDemoDatabase();
   });
 
-  it('1. Inicializa correctamente las 9 categorías, 22 preguntas y 18 recompensas con insignias del álbum', () => {
+  it('1. Inicializa correctamente las 9 categorías, 82 preguntas (incluyendo las 60 de cáncer de próstata) y 18 recompensas con insignias del álbum', () => {
     const categories = uroRepository.getCategories();
     const questions = uroRepository.getQuestions();
     const rewards = uroRepository.getRewards();
 
     expect(categories.length).toBe(9);
-    expect(questions.length).toBeGreaterThanOrEqual(20);
+    expect(questions.length).toBe(82);
+    const prostateQuestions = questions.filter((q) => q.id.startsWith('q-cap-'));
+    expect(prostateQuestions.length).toBe(60);
+    expect(prostateQuestions.filter((q) => q.difficulty === 'basic').length).toBe(30);
+    expect(prostateQuestions.filter((q) => q.difficulty === 'intermediate').length).toBe(30);
     expect(rewards.length).toBe(18);
   });
 
@@ -226,14 +230,14 @@ describe('UroChallenge Domain & Repository Engine', () => {
     expect(uroRepository.getCurrentUser()?.id).toBe(created.id);
   });
 
-  it('9. Diccionario Urológico: carga 14 categorías, 27 términos publicados y ejecuta búsqueda inteligente por abreviaturas y sinónimos', () => {
+  it('9. Diccionario Urológico: carga 14 categorías, 50 términos publicados (incluyendo los 23 de cáncer de próstata) y ejecuta búsqueda inteligente por abreviaturas y sinónimos', () => {
     const userId = 'user-demo-01';
     const categories = uroRepository.getDictionaryCategories(false);
     expect(categories.length).toBe(14);
 
-    // Regular users only see published terms (27 published out of 29 total)
+    // Regular users only see published terms (50 published out of 52 total)
     const publishedTerms = uroRepository.getDictionaryTerms({ userId, includeUnpublished: false });
-    expect(publishedTerms.length).toBe(27);
+    expect(publishedTerms.length).toBe(50);
     expect(publishedTerms.every((t) => t.editorial_status === 'published')).toBe(true);
 
     // Search by exact abbreviation "HPB" returns Hiperplasia prostática benigna first
@@ -318,6 +322,6 @@ describe('UroChallenge Domain & Repository Engine', () => {
     // Admin publishes a term that was in "review" (uterm-28: Reflujo vesicoureteral)
     uroRepository.updateDictionaryTermStatus(adminId, 'uterm-28', 'published');
     const afterPublish = uroRepository.getDictionaryTerms({ userId, includeUnpublished: false });
-    expect(afterPublish.length).toBe(28);
+    expect(afterPublish.length).toBe(51);
   });
 });

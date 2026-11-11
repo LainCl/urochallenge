@@ -328,22 +328,57 @@ class UroChallengeRepository {
       if (!Array.isArray(parsed.dictionaryTerms) || parsed.dictionaryTerms.length === 0) {
         parsed.dictionaryTerms = INITIAL_DICTIONARY_TERMS;
         migrated = true;
+      } else {
+        for (const seedTerm of INITIAL_DICTIONARY_TERMS) {
+          if (!parsed.dictionaryTerms.some((t) => t.id === seedTerm.id)) {
+            parsed.dictionaryTerms.push(seedTerm);
+            migrated = true;
+          }
+        }
       }
       if (!Array.isArray(parsed.dictionaryAliases)) {
         parsed.dictionaryAliases = INITIAL_DICTIONARY_ALIASES;
         migrated = true;
+      } else {
+        for (const seedAlias of INITIAL_DICTIONARY_ALIASES) {
+          if (!parsed.dictionaryAliases.some((a) => a.id === seedAlias.id)) {
+            parsed.dictionaryAliases.push(seedAlias);
+            migrated = true;
+          }
+        }
       }
       if (!Array.isArray(parsed.dictionaryTags)) {
         parsed.dictionaryTags = INITIAL_DICTIONARY_TAGS;
         migrated = true;
+      } else {
+        for (const seedTag of INITIAL_DICTIONARY_TAGS) {
+          if (!parsed.dictionaryTags.some((tg) => tg.id === seedTag.id)) {
+            parsed.dictionaryTags.push(seedTag);
+            migrated = true;
+          }
+        }
       }
       if (!Array.isArray(parsed.dictionaryReferences)) {
         parsed.dictionaryReferences = INITIAL_DICTIONARY_REFERENCES;
         migrated = true;
+      } else {
+        for (const seedRef of INITIAL_DICTIONARY_REFERENCES) {
+          if (!parsed.dictionaryReferences.some((rf) => rf.id === seedRef.id)) {
+            parsed.dictionaryReferences.push(seedRef);
+            migrated = true;
+          }
+        }
       }
       if (!Array.isArray(parsed.dictionaryRelations)) {
         parsed.dictionaryRelations = INITIAL_DICTIONARY_RELATIONS;
         migrated = true;
+      } else {
+        for (const seedRel of INITIAL_DICTIONARY_RELATIONS) {
+          if (!parsed.dictionaryRelations.some((rl) => rl.id === seedRel.id)) {
+            parsed.dictionaryRelations.push(seedRel);
+            migrated = true;
+          }
+        }
       }
       if (!Array.isArray(parsed.userFavoriteTerms)) {
         parsed.userFavoriteTerms = [];
@@ -357,6 +392,17 @@ class UroChallengeRepository {
         if (!parsed.pointRules.some((r) => r.action_key === seedRule.action_key)) {
           parsed.pointRules.push(seedRule);
           migrated = true;
+        }
+      }
+      if (!Array.isArray(parsed.questions)) {
+        parsed.questions = INITIAL_QUESTIONS;
+        migrated = true;
+      } else {
+        for (const seedQuestion of INITIAL_QUESTIONS) {
+          if (!parsed.questions.some((q) => q.id === seedQuestion.id)) {
+            parsed.questions.push(seedQuestion);
+            migrated = true;
+          }
         }
       }
       for (const seedReward of INITIAL_REWARDS) {

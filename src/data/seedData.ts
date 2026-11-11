@@ -14,6 +14,7 @@ import {
   ExperienceLedgerEntry,
   UserLevelHistoryEntry,
 } from '../types/domain';
+import { PROSTATE_CANCER_QUESTIONS } from './prostateCancerQuestions';
 
 export const DEMO_USERS: Profile[] = [
   {
@@ -617,6 +618,7 @@ export const INITIAL_QUESTIONS: Question[] = [
       { id: 'q-022-d', question_id: 'q-022', option_text: 'Contracción simultánea del detrusor y del esfínter externo estriado', is_correct: false, sort_order: 4 },
     ],
   },
+  ...PROSTATE_CANCER_QUESTIONS,
 ];
 
 export const INITIAL_POINT_RULES: PointRule[] = [
