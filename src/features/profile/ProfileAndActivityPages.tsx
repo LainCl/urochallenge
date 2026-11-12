@@ -17,11 +17,21 @@ import {
   ShieldAlert,
   LogOut,
   UserPlus,
+  Smartphone,
+  Cloud,
 } from 'lucide-react';
 import { useApp } from '../../app/providers';
 import { uroRepository } from '../../services/uroRepository';
 import { ActivityCalendar } from '../../components/dashboard/ActivityCalendar';
 import { MyProgressRpgCard } from '../../components/dashboard/RpgProgressWidgets';
+import {
+  canPromptPwaInstall,
+  isRunningAsPwa,
+  promptPwaInstall,
+  requestBrowserNotifications,
+  sendStudyNotification,
+} from '../../lib/pwa';
+import { checkSupabaseConnection, SupabaseConnectionStatus } from '../../lib/supabaseSync';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -158,7 +168,7 @@ export const ActivityPage: React.FC = () => {
                     Test de {q.total_questions} preguntas — {q.correct_answers}/{q.total_questions}{' '}
                     aciertos ({pct}%)
                   </span>
-                  <span className="text-[11px] text-[#858BA1]">
+                  <span className="text-meta text-[#858BA1]">
                     Completado el{' '}
                     {format(new Date(q.completed_at || q.started_at), "d 'de' MMM yyyy, HH:mm", {
                       locale: es,
@@ -215,7 +225,7 @@ export const ActivityPage: React.FC = () => {
                   <p className="text-xs sm:text-sm font-bold text-[#202744] truncate">
                     {entry.reason}
                   </p>
-                  <p className="text-[11px] text-[#858BA1]">
+                  <p className="text-meta text-[#858BA1]">
                     {format(new Date(entry.created_at), "d 'de' MMM yyyy, HH:mm", { locale: es })} •
                     Tipo: <span className="uppercase font-semibold">{entry.entry_type}</span>
                   </p>
@@ -245,6 +255,11 @@ export const ProfilePage: React.FC = () => {
   const [timezone, setTimezone] = useState(user?.timezone || 'America/Santiago');
   const [savedNotice, setSavedNotice] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [notifStatus, setNotifStatus] = useState<string>(() =>
+    typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'unsupported'
+  );
+  const [pwaStatusMsg, setPwaStatusMsg] = useState<string | null>(null);
+  const [cloudStatus, setCloudStatus] = useState<SupabaseConnectionStatus | null>(null);
 
   if (!user || !stats) return null;
 
@@ -276,7 +291,7 @@ export const ProfilePage: React.FC = () => {
               .join('')}
           </div>
           <div>
-            <span className="px-3 py-0.5 rounded-full bg-[#5149B8]/10 text-[#5149B8] text-[11px] font-extrabold uppercase">
+            <span className="px-3 py-0.5 rounded-full bg-[#5149B8]/10 text-[#5149B8] text-meta font-extrabold uppercase">
               {user.role === 'admin' ? 'Administrador / Editor' : 'Perfil Académico'}
             </span>
             <h1 className="text-xl sm:text-2xl font-extrabold text-[#202744] mt-1">
@@ -338,40 +353,40 @@ export const ProfilePage: React.FC = () => {
         <div className="bg-white rounded-3xl p-4 card-soft-shadow border border-white">
           <Coins className="w-5 h-5 text-[#5149B8] mb-2" />
           <span className="text-xl font-black text-[#202744] block">{stats.currentBalance}</span>
-          <span className="text-[11px] font-semibold text-[#858BA1]">Saldo Actual</span>
+          <span className="text-meta font-semibold text-[#858BA1]">Saldo Actual</span>
         </div>
         <div className="bg-white rounded-3xl p-4 card-soft-shadow border border-white">
           <Sparkles className="w-5 h-5 text-emerald-600 mb-2" />
           <span className="text-xl font-black text-[#202744] block">{stats.totalEarned}</span>
-          <span className="text-[11px] font-semibold text-[#858BA1]">Puntos Ganados</span>
+          <span className="text-meta font-semibold text-[#858BA1]">Puntos Ganados</span>
         </div>
         <div className="bg-white rounded-3xl p-4 card-soft-shadow border border-white">
           <BookOpenCheck className="w-5 h-5 text-[#5149B8] mb-2" />
           <span className="text-xl font-black text-[#202744] block">
             {stats.questionsAnswered}
           </span>
-          <span className="text-[11px] font-semibold text-[#858BA1]">Preg. Respondidas</span>
+          <span className="text-meta font-semibold text-[#858BA1]">Preg. Respondidas</span>
         </div>
         <div className="bg-white rounded-3xl p-4 card-soft-shadow border border-white">
           <Target className="w-5 h-5 text-blue-600 mb-2" />
           <span className="text-xl font-black text-[#202744] block">
             {stats.accuracyPercentage}%
           </span>
-          <span className="text-[11px] font-semibold text-[#858BA1]">% de Aciertos</span>
+          <span className="text-meta font-semibold text-[#858BA1]">% de Aciertos</span>
         </div>
         <div className="bg-white rounded-3xl p-4 card-soft-shadow border border-white">
           <Flame className="w-5 h-5 text-amber-500 mb-2" />
           <span className="text-xl font-black text-[#202744] block">
             {stats.currentStreak} días
           </span>
-          <span className="text-[11px] font-semibold text-[#858BA1]">Racha Actual</span>
+          <span className="text-meta font-semibold text-[#858BA1]">Racha Actual</span>
         </div>
         <div className="bg-white rounded-3xl p-4 card-soft-shadow border border-white">
           <Trophy className="w-5 h-5 text-purple-600 mb-2" />
           <span className="text-xl font-black text-[#202744] block">
             {stats.bestStreak} días
           </span>
-          <span className="text-[11px] font-semibold text-[#858BA1]">Mejor Racha</span>
+          <span className="text-meta font-semibold text-[#858BA1]">Mejor Racha</span>
         </div>
       </div>
 
@@ -526,6 +541,96 @@ export const ProfilePage: React.FC = () => {
               )}
             </div>
           )}
+
+          {/* PWA, Push Notifications & Supabase Cloud Sync (Fase 5) */}
+          <div className="bg-white rounded-[32px] p-6 card-soft-shadow border border-white space-y-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Smartphone className="w-5 h-5 text-[#5149B8]" />
+                <h2 className="text-base font-extrabold text-[#202744]">
+                  App Instalable (PWA) y Nube
+                </h2>
+              </div>
+              <span className="px-2.5 py-0.5 rounded-full bg-[#C3F574] text-[#202744] text-meta font-extrabold">
+                {isRunningAsPwa() ? 'Instalada' : 'Web App'}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {canPromptPwaInstall() && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const res = await promptPwaInstall();
+                    setPwaStatusMsg(
+                      res === 'accepted'
+                        ? '¡Aplicación instalada en tu dispositivo!'
+                        : 'Instalación cancelada.'
+                    );
+                  }}
+                  className="px-4 py-2 rounded-xl bg-[#5149B8] hover:bg-[#41399e] text-white text-xs font-extrabold flex items-center gap-1.5 transition cursor-pointer"
+                >
+                  <Smartphone className="w-3.5 h-3.5" />
+                  <span>Instalar UroChallenge</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={async () => {
+                  const perm = await requestBrowserNotifications();
+                  setNotifStatus(perm);
+                  if (perm === 'granted') {
+                    await sendStudyNotification(
+                      'UroChallenge',
+                      '¡Notificaciones de estudio activadas correctamente!'
+                    );
+                    setPwaStatusMsg('Permiso concedido y notificación de prueba enviada.');
+                  } else {
+                    setPwaStatusMsg(`Estado de notificaciones: ${perm}`);
+                  }
+                }}
+                className="px-4 py-2 rounded-xl bg-[#F5F7FC] hover:bg-[#5149B8]/10 text-[#5149B8] text-xs font-extrabold flex items-center gap-1.5 border border-[#5149B8]/20 transition cursor-pointer"
+              >
+                <Bell className="w-3.5 h-3.5" />
+                <span>
+                  {notifStatus === 'granted'
+                    ? 'Probar notificación'
+                    : 'Activar notificaciones'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  const status = await checkSupabaseConnection();
+                  setCloudStatus(status);
+                }}
+                className="px-4 py-2 rounded-xl bg-[#F5F7FC] hover:bg-[#5149B8]/10 text-[#202744] text-xs font-extrabold flex items-center gap-1.5 border border-slate-200 transition cursor-pointer"
+              >
+                <Cloud className="w-3.5 h-3.5 text-[#5149B8]" />
+                <span>Verificar Supabase</span>
+              </button>
+            </div>
+
+            {pwaStatusMsg && (
+              <p className="text-xs font-semibold text-[#5149B8] bg-[#5149B8]/8 px-3 py-2 rounded-xl">
+                {pwaStatusMsg}
+              </p>
+            )}
+
+            {cloudStatus && (
+              <p
+                className={`text-xs font-semibold px-3 py-2 rounded-xl border ${
+                  cloudStatus.connected
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                    : 'bg-slate-50 border-slate-200 text-[#202744]'
+                }`}
+              >
+                {cloudStatus.message}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -552,7 +657,7 @@ export const ProfilePage: React.FC = () => {
             >
               <div>
                 <span className="font-bold text-[#202744] block">{item.reason}</span>
-                <span className="text-[11px] text-[#858BA1]">
+                <span className="text-meta text-[#858BA1]">
                   {format(new Date(item.created_at), "d 'de' MMM yyyy, HH:mm", { locale: es })}
                 </span>
               </div>

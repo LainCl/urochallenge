@@ -7,13 +7,13 @@ describe('UroChallenge Domain & Repository Engine', () => {
     uroRepository.resetDemoDatabase();
   });
 
-  it('1. Inicializa correctamente las 9 categorías, 82 preguntas (incluyendo las 60 de cáncer de próstata) y 18 recompensas con insignias del álbum', () => {
+  it('1. Inicializa correctamente las 9 categorías, 282 preguntas (incluyendo próstata, renal y módulos expandidos) y 18 recompensas con insignias del álbum', () => {
     const categories = uroRepository.getCategories();
     const questions = uroRepository.getQuestions();
     const rewards = uroRepository.getRewards();
 
     expect(categories.length).toBe(9);
-    expect(questions.length).toBe(82);
+    expect(questions.length).toBe(282);
     const prostateQuestions = questions.filter((q) => q.id.startsWith('q-cap-'));
     expect(prostateQuestions.length).toBe(60);
     expect(prostateQuestions.filter((q) => q.difficulty === 'basic').length).toBe(30);
@@ -322,6 +322,6 @@ describe('UroChallenge Domain & Repository Engine', () => {
     // Admin publishes a term that was in "review" (uterm-28: Reflujo vesicoureteral)
     uroRepository.updateDictionaryTermStatus(adminId, 'uterm-28', 'published');
     const afterPublish = uroRepository.getDictionaryTerms({ userId, includeUnpublished: false });
-    expect(afterPublish.length).toBe(51);
+    expect(afterPublish.length).toBe(75);
   });
 });

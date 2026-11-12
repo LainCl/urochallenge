@@ -18,8 +18,10 @@ import {
   QuizProgress,
   AnswerOption,
   QuestionResult,
+  QuestionClinicalImage,
 } from '../../components/questions/QuestionComponents';
 import { ErrorState } from '../../components/common/FeedbackStates';
+import { AnimatedNumber, ConfettiBurst } from '../../components/common/Motion';
 
 export const QuizIntroPage: React.FC = () => {
   const { user, settings } = useApp();
@@ -89,19 +91,19 @@ export const QuizIntroPage: React.FC = () => {
         {/* Transparent Point Rules Box */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 bg-white/15 backdrop-blur-md rounded-2xl p-4">
           <div>
-            <span className="text-[10px] uppercase tracking-wider text-white/75 block">
+            <span className="text-meta uppercase tracking-wider text-white/75 block">
               Por completar
             </span>
             <span className="text-base font-extrabold text-[#C3F574]">+{completionPts} pts base</span>
           </div>
           <div>
-            <span className="text-[10px] uppercase tracking-wider text-white/75 block">
+            <span className="text-meta uppercase tracking-wider text-white/75 block">
               Por cada acierto
             </span>
             <span className="text-base font-extrabold text-white">+{perCorrectPts} pts adicionales</span>
           </div>
           <div>
-            <span className="text-[10px] uppercase tracking-wider text-white/75 block">
+            <span className="text-meta uppercase tracking-wider text-white/75 block">
               Puntaje máximo
             </span>
             <span className="text-base font-extrabold text-[#83D0E5]">
@@ -262,14 +264,19 @@ export const QuizSessionPage: React.FC = () => {
           <span className="px-3 py-1 rounded-full bg-[#5149B8]/10 text-[#5149B8] text-xs font-extrabold">
             {category?.name || 'Urología'}
           </span>
-          <span className="text-[11px] font-bold text-[#858BA1]">
+          <span className="text-meta font-bold text-[#858BA1]">
             Pregunta {currentItem.position} de {session.total_questions}
           </span>
         </div>
 
-        <h2 className="text-lg sm:text-xl font-extrabold text-[#202744] leading-snug mb-6">
+        <h2 className="text-lg sm:text-xl font-extrabold text-[#202744] leading-snug mb-5">
           {question.question_text}
         </h2>
+
+        <QuestionClinicalImage
+          imageUrl={question.image_url}
+          caption={question.image_caption}
+        />
 
         <div className="space-y-3">
           {question.options
@@ -305,6 +312,7 @@ export const QuizSessionPage: React.FC = () => {
               isCorrect={Boolean(currentItem.is_correct)}
               explanation={question.explanation}
               referenceText={question.reference_text}
+              relatedTerms={uroRepository.findRelatedDictionaryTermsForQuestion(question)}
             />
             <div className="mt-6 pt-4 border-t border-slate-100">
               <button
@@ -352,6 +360,7 @@ export const QuizResultPage: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
+      <ConfettiBurst active={accuracyPct >= 70} />
       {/* Summary Hero Card */}
       <div className="card-hero-violet rounded-[36px] p-7 sm:p-9 text-white text-center relative overflow-hidden">
         <div className="w-16 h-16 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center mx-auto mb-4">
@@ -374,17 +383,19 @@ export const QuizResultPage: React.FC = () => {
             <span className="text-2xl font-black block">
               {session.correct_answers}/{session.total_questions}
             </span>
-            <span className="text-[11px] text-white/80 font-semibold">Puntaje</span>
+            <span className="text-meta text-white/80 font-semibold">Puntaje</span>
           </div>
           <div className="bg-white/15 backdrop-blur-md rounded-2xl p-3.5">
-            <span className="text-2xl font-black text-[#C3F574] block">{accuracyPct}%</span>
-            <span className="text-[11px] text-white/80 font-semibold">Precisión</span>
-          </div>
-          <div className="bg-white/15 backdrop-blur-md rounded-2xl p-3.5">
-            <span className="text-2xl font-black text-[#83D0E5] block">
-              +{session.points_awarded}
+            <span className="text-2xl font-black text-[#C3F574] block tabular-nums">
+              <AnimatedNumber value={accuracyPct} suffix="%" />
             </span>
-            <span className="text-[11px] text-white/80 font-semibold">Puntos ganados</span>
+            <span className="text-meta text-white/80 font-semibold">Precisión</span>
+          </div>
+          <div className="bg-white/15 backdrop-blur-md rounded-2xl p-3.5">
+            <span className="text-2xl font-black text-[#83D0E5] block tabular-nums">
+              <AnimatedNumber value={session.points_awarded} prefix="+" />
+            </span>
+            <span className="text-meta text-white/80 font-semibold">Puntos ganados</span>
           </div>
         </div>
 
@@ -461,6 +472,12 @@ export const QuizResultPage: React.FC = () => {
                   {q.question_text}
                 </h3>
 
+                <QuestionClinicalImage
+                  imageUrl={q.image_url}
+                  caption={q.image_caption}
+                  compact={true}
+                />
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
                   <div
                     className={`p-3 rounded-2xl border ${
@@ -480,20 +497,44 @@ export const QuizResultPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-[#F5F7FC] text-xs text-[#202744] leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <strong className="text-[#5149B8] block mb-0.5">Explicación:</strong>
-                    {q.explanation}
+                <div className="p-3.5 rounded-2xl bg-[#F5F7FC] text-xs text-[#202744] leading-relaxed space-y-2.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <strong className="text-[#5149B8] block mb-0.5">Explicación:</strong>
+                      {q.explanation}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(`/app/dictionary?q=${encodeURIComponent(q.tags[0] || '')}`)
+                      }
+                      className="px-3 py-1.5 rounded-xl bg-white hover:bg-[#5149B8] text-[#5149B8] hover:text-white text-meta font-extrabold border border-[#5149B8]/20 transition shrink-0 cursor-pointer self-start sm:self-center"
+                    >
+                      Buscar en Diccionario
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      navigate(`/app/dictionary?q=${encodeURIComponent(q.tags[0] || '')}`)
-                    }
-                    className="px-3 py-1.5 rounded-xl bg-white hover:bg-[#5149B8] text-[#5149B8] hover:text-white text-[11px] font-extrabold border border-[#5149B8]/20 transition shrink-0 cursor-pointer self-start sm:self-center"
-                  >
-                    Repasar concepto en Diccionario
-                  </button>
+
+                  {(() => {
+                    const matched = uroRepository.findRelatedDictionaryTermsForQuestion(q, 3);
+                    if (matched.length === 0) return null;
+                    return (
+                      <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-200/70">
+                        <span className="text-meta font-bold text-[#858BA1] mr-1">
+                          Fichas relacionadas:
+                        </span>
+                        {matched.map((rt) => (
+                          <button
+                            key={rt.id}
+                            type="button"
+                            onClick={() => navigate(`/app/dictionary/${rt.slug}`)}
+                            className="px-2.5 py-1 rounded-full bg-white hover:bg-[#5149B8] text-[#5149B8] hover:text-white text-meta font-extrabold border border-[#5149B8]/20 transition cursor-pointer"
+                          >
+                            {rt.term} →
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             );

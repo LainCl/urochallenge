@@ -41,6 +41,8 @@ export interface Question {
   id: string;
   category_id: string;
   question_text: string;
+  image_url?: string | null;
+  image_caption?: string | null;
   difficulty: QuestionDifficulty;
   explanation: string;
   reference_text: string | null;

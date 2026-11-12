@@ -280,25 +280,25 @@ export const AdminDictionaryPage: React.FC = () => {
     switch (status) {
       case 'published':
         return (
-          <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold uppercase">
+          <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-meta font-extrabold uppercase">
             Publicado
           </span>
         );
       case 'review':
         return (
-          <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-extrabold uppercase">
+          <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-meta font-extrabold uppercase">
             En Revisión
           </span>
         );
       case 'draft':
         return (
-          <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-extrabold uppercase">
+          <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-meta font-extrabold uppercase">
             Borrador
           </span>
         );
       case 'archived':
         return (
-          <span className="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[11px] font-extrabold uppercase">
+          <span className="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-meta font-extrabold uppercase">
             Archivado
           </span>
         );
@@ -365,23 +365,23 @@ export const AdminDictionaryPage: React.FC = () => {
       {/* Dashboard KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <div className="bg-white rounded-3xl p-4 border border-slate-200/70 shadow-xs">
-          <span className="text-[11px] font-bold text-[#858BA1] block">Total Términos</span>
+          <span className="text-meta font-bold text-[#858BA1] block">Total Términos</span>
           <span className="text-2xl font-black text-[#202744]">{stats.totalTerms}</span>
         </div>
         <div className="bg-white rounded-3xl p-4 border border-slate-200/70 shadow-xs">
-          <span className="text-[11px] font-bold text-emerald-700 block">Publicados</span>
+          <span className="text-meta font-bold text-emerald-700 block">Publicados</span>
           <span className="text-2xl font-black text-emerald-600">{stats.publishedTerms}</span>
         </div>
         <div className="bg-white rounded-3xl p-4 border border-slate-200/70 shadow-xs">
-          <span className="text-[11px] font-bold text-amber-700 block">En Revisión</span>
+          <span className="text-meta font-bold text-amber-700 block">En Revisión</span>
           <span className="text-2xl font-black text-amber-600">{stats.reviewTerms}</span>
         </div>
         <div className="bg-white rounded-3xl p-4 border border-slate-200/70 shadow-xs">
-          <span className="text-[11px] font-bold text-slate-600 block">En Borrador</span>
+          <span className="text-meta font-bold text-slate-600 block">En Borrador</span>
           <span className="text-2xl font-black text-slate-700">{stats.draftTerms}</span>
         </div>
         <div className="bg-white rounded-3xl p-4 border border-slate-200/70 shadow-xs">
-          <span className="text-[11px] font-bold text-[#5149B8] block">Categorías</span>
+          <span className="text-meta font-bold text-[#5149B8] block">Categorías</span>
           <span className="text-2xl font-black text-[#5149B8]">{stats.totalCategories}</span>
         </div>
       </div>
@@ -471,7 +471,7 @@ export const AdminDictionaryPage: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 text-[11px] font-extrabold uppercase text-[#858BA1]">
+                <tr className="border-b border-slate-200 text-meta font-extrabold uppercase text-[#858BA1]">
                   <th className="py-3 px-3">Término / Slug</th>
                   <th className="py-3 px-3">Categoría</th>
                   <th className="py-3 px-3">Estado Editorial</th>
@@ -484,13 +484,13 @@ export const AdminDictionaryPage: React.FC = () => {
                   <tr key={t.id} className="hover:bg-slate-50/80">
                     <td className="py-3.5 px-3">
                       <div className="font-extrabold text-[#202744] text-sm">{t.term}</div>
-                      <div className="text-[11px] text-[#858BA1] font-mono">/{t.slug}</div>
+                      <div className="text-meta text-[#858BA1] font-mono">/{t.slug}</div>
                       {t.aliases.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-1">
                           {t.aliases.map((al) => (
                             <span
                               key={al.id}
-                              className="px-1.5 py-0.5 rounded bg-violet-50 text-violet-700 text-[10px] font-bold"
+                              className="px-1.5 py-0.5 rounded bg-violet-50 text-violet-700 text-meta font-bold"
                             >
                               {al.alias}
                             </span>
@@ -501,7 +501,7 @@ export const AdminDictionaryPage: React.FC = () => {
                     <td className="py-3.5 px-3">
                       {t.category ? (
                         <span
-                          className="px-2.5 py-1 rounded-full text-[11px] font-extrabold text-white inline-block"
+                          className="px-2.5 py-1 rounded-full text-meta font-extrabold text-white inline-block"
                           style={{ backgroundColor: t.category.color || '#5149B8' }}
                         >
                           {t.category.name}
@@ -511,7 +511,7 @@ export const AdminDictionaryPage: React.FC = () => {
                       )}
                     </td>
                     <td className="py-3.5 px-3">{statusBadge(t.editorial_status)}</td>
-                    <td className="py-3.5 px-3 text-[11px] text-[#858BA1]">
+                    <td className="py-3.5 px-3 text-meta text-[#858BA1]">
                       <div>
                         Act: {format(new Date(t.updated_at), "d MMM yyyy, HH:mm", { locale: es })}
                       </div>
@@ -548,7 +548,7 @@ export const AdminDictionaryPage: React.FC = () => {
                             type="button"
                             onClick={() => handleChangeStatus(t.id, 'published')}
                             title="Publicar término"
-                            className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition cursor-pointer"
+                            className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-meta font-bold transition cursor-pointer"
                           >
                             Publicar
                           </button>
@@ -557,7 +557,7 @@ export const AdminDictionaryPage: React.FC = () => {
                             type="button"
                             onClick={() => handleChangeStatus(t.id, 'review')}
                             title="Despublicar (pasar a revisión)"
-                            className="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-800 text-[11px] font-bold transition cursor-pointer"
+                            className="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-800 text-meta font-bold transition cursor-pointer"
                           >
                             Despublicar
                           </button>
@@ -865,7 +865,7 @@ export const AdminDictionaryPage: React.FC = () => {
                   {termName || '(Sin nombre de término)'}
                 </h3>
                 <div className="bg-white rounded-2xl p-4 border border-slate-200/80">
-                  <span className="text-[10px] font-extrabold uppercase text-[#5149B8] block mb-1">
+                  <span className="text-meta font-extrabold uppercase text-[#5149B8] block mb-1">
                     Definición breve
                   </span>
                   <p className="text-sm font-bold text-[#202744]">
@@ -874,7 +874,7 @@ export const AdminDictionaryPage: React.FC = () => {
                 </div>
                 {fullDef && (
                   <div className="bg-white rounded-2xl p-4 border border-slate-200/80">
-                    <span className="text-[10px] font-extrabold uppercase text-[#858BA1] block mb-1">
+                    <span className="text-meta font-extrabold uppercase text-[#858BA1] block mb-1">
                       Explicación ampliada
                     </span>
                     <p className="text-xs text-slate-700 whitespace-pre-line">{fullDef}</p>
@@ -1200,7 +1200,7 @@ export const AdminDictionaryPage: React.FC = () => {
 
             <h3 className="text-2xl font-black text-[#202744]">{previewTerm.term}</h3>
             <div className="p-4 rounded-2xl bg-[#F5F7FC] border border-slate-200/80">
-              <span className="text-[10px] font-extrabold uppercase text-[#5149B8] block mb-1">
+              <span className="text-meta font-extrabold uppercase text-[#5149B8] block mb-1">
                 Definición Breve
               </span>
               <p className="text-sm font-bold text-[#202744]">{previewTerm.short_definition}</p>

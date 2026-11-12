@@ -51,7 +51,7 @@ export const ActivityCalendar: React.FC<{
               onClick={() => onSelectDate(day)}
               className={`py-3 px-1 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer ${pillStyle}`}
             >
-              <span className="text-[10px] font-bold uppercase opacity-80 mb-1">
+              <span className="text-meta font-bold uppercase opacity-80 mb-1">
                 {format(day, 'EEE', { locale: es }).slice(0, 3)}
               </span>
               <span className="text-sm sm:text-base font-extrabold">
@@ -78,13 +78,13 @@ export const ActivityCalendar: React.FC<{
       {/* Recent active dates quick chips */}
       {activeDates.length > 0 && (
         <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2 flex-wrap">
-          <span className="text-[11px] font-bold text-[#858BA1]">Días con registro:</span>
+          <span className="text-meta font-bold text-[#858BA1]">Días con registro:</span>
           {activeDates.slice(-5).map((dateStr) => (
             <button
               key={dateStr}
               type="button"
               onClick={() => onSelectDate(parseISO(dateStr))}
-              className="px-2.5 py-1 rounded-full bg-[#F5F7FC] hover:bg-[#5149B8]/10 text-[11px] font-bold text-[#5149B8] transition cursor-pointer"
+              className="px-2.5 py-1 rounded-full bg-[#F5F7FC] hover:bg-[#5149B8]/10 text-meta font-bold text-[#5149B8] transition cursor-pointer"
             >
               {dateStr}
             </button>

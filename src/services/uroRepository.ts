@@ -259,6 +259,14 @@ function getInitialDatabaseState(): LocalDatabaseState {
   };
 }
 
+export interface CategoryMasteryEntry {
+  correct: number;
+  total: number;
+  percentage: number;
+  lastAnsweredAt: string | null;
+  level: 'new' | 'weak' | 'progress' | 'mastered';
+}
+
 class UroChallengeRepository {
   private loadDb(): LocalDatabaseState {
     try {
@@ -1094,6 +1102,53 @@ class UroChallengeRepository {
       bestStreak: streak?.best_streak ?? 0,
       activeDates: streak?.active_dates ?? [],
     };
+  }
+
+  /**
+   * Computes per-category mastery (accuracy) for a user, combining daily attempts
+   * and answered quiz-session questions.
+   */
+  public getUserCategoryMastery(userId: string): Record<string, CategoryMasteryEntry> {
+    const db = this.loadDb();
+    const questionCategory = new Map<string, string>();
+    for (const q of this.getQuestions()) {
+      questionCategory.set(q.id, q.category_id);
+    }
+
+    const acc: Record<string, { correct: number; total: number; lastAnsweredAt: string | null }> = {};
+    const register = (questionId: string, isCorrect: boolean, answeredAt: string | null) => {
+      const catId = questionCategory.get(questionId);
+      if (!catId) return;
+      const entry = acc[catId] || { correct: 0, total: 0, lastAnsweredAt: null };
+      entry.total += 1;
+      if (isCorrect) entry.correct += 1;
+      if (answeredAt && (!entry.lastAnsweredAt || answeredAt > entry.lastAnsweredAt)) {
+        entry.lastAnsweredAt = answeredAt;
+      }
+      acc[catId] = entry;
+    };
+
+    for (const a of db.answerAttempts) {
+      if (a.user_id === userId && a.source === 'daily') {
+        register(a.question_id, a.is_correct, a.answered_at);
+      }
+    }
+    for (const s of db.quizSessions) {
+      if (s.user_id !== userId) continue;
+      for (const sq of s.questions || []) {
+        if (sq.is_correct === null || sq.is_correct === undefined) continue;
+        register(sq.question_id, sq.is_correct, sq.answered_at);
+      }
+    }
+
+    const result: Record<string, CategoryMasteryEntry> = {};
+    for (const [catId, e] of Object.entries(acc)) {
+      const percentage = e.total > 0 ? Math.round((e.correct / e.total) * 100) : 0;
+      const level =
+        e.total === 0 ? 'new' : e.total >= 5 && percentage >= 80 ? 'mastered' : percentage < 50 ? 'weak' : 'progress';
+      result[catId] = { ...e, percentage, level };
+    }
+    return result;
   }
 
   // ==================== DAILY / PERIODIC QUESTION ====================
@@ -2803,6 +2858,106 @@ class UroChallengeRepository {
     const db = this.loadDb();
     db.userTermViews = (db.userTermViews || []).filter((v) => v.user_id !== userId);
     this.saveDb(db);
+  }
+
+  /**
+   * Finds up to `limit` published dictionary terms related to a question's text,
+   * explanation, or tags (F6: Pregunta <-> Diccionario links).
+   */
+  public findRelatedDictionaryTermsForQuestion(
+    question: Pick<Question, 'question_text' | 'explanation' | 'tags'>,
+    limit = 4
+  ): Array<{ id: string; slug: string; term: string }> {
+    const db = this.loadDb();
+    const publishedTerms = (db.dictionaryTerms || []).filter(
+      (t) => t.editorial_status === 'published'
+    );
+    const aliases = db.dictionaryAliases || [];
+    const termTags = db.dictionaryTags || [];
+
+    const normFull = this.normalizeSearchText(
+      `${question.question_text} ${question.explanation} ${(question.tags || []).join(' ')}`
+    );
+    const normQuestionTags = (question.tags || []).map((tg) => this.normalizeSearchText(tg));
+
+    const scored: Array<{ id: string; slug: string; term: string; score: number }> = [];
+
+    for (const t of publishedTerms) {
+      let score = 0;
+      const normName = this.normalizeSearchText(t.term);
+      // Extract core name before parentheses (e.g., "Antígeno Prostático Específico (APE / PSA)" -> "antigeno prostatico especifico")
+      const coreName = this.normalizeSearchText(t.term.replace(/\([^)]*\)/g, '').trim());
+
+      if (normName.length >= 4 && normFull.includes(normName)) {
+        score += 10;
+      } else if (coreName.length >= 5 && normFull.includes(coreName)) {
+        score += 8;
+      }
+
+      const tAliases = aliases.filter((a) => a.term_id === t.id);
+      for (const a of tAliases) {
+        const normAlias = this.normalizeSearchText(a.alias);
+        if (normAlias.length >= 3) {
+          if (normQuestionTags.some((qt) => qt === normAlias || qt.includes(normAlias))) {
+            score += 7;
+          } else if (normAlias.length >= 4 && normFull.includes(normAlias)) {
+            score += 5;
+          }
+        }
+      }
+
+      const tTags = termTags.filter((tg) => tg.term_id === t.id);
+      for (const tg of tTags) {
+        const normTag = this.normalizeSearchText(tg.tag);
+        if (normTag.length >= 4 && normQuestionTags.some((qt) => qt.includes(normTag) || normTag.includes(qt))) {
+          score += 4;
+        }
+      }
+
+      if (score > 0) {
+        scored.push({ id: t.id, slug: t.slug, term: t.term, score });
+      }
+    }
+
+    return scored
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map(({ id, slug, term }) => ({ id, slug, term }));
+  }
+
+  /**
+   * Finds published questions related to a dictionary term (F6).
+   */
+  public getQuestionsRelatedToDictionaryTerm(
+    termName: string,
+    aliases: string[],
+    tags: string[],
+    limit = 3
+  ): Question[] {
+    const db = this.loadDb();
+    const published = (db.questions || []).filter((q) => q.status === 'published');
+    const coreName = this.normalizeSearchText(termName.replace(/\([^)]*\)/g, '').trim());
+    const needles = [
+      coreName,
+      ...aliases.map((a) => this.normalizeSearchText(a)),
+      ...tags.map((tg) => this.normalizeSearchText(tg)),
+    ].filter((n) => n.length >= 4);
+
+    const scored: Array<{ q: Question; score: number }> = [];
+    for (const q of published) {
+      const haystack = this.normalizeSearchText(
+        `${q.question_text} ${q.explanation} ${(q.tags || []).join(' ')}`
+      );
+      let score = 0;
+      for (const n of needles) {
+        if (haystack.includes(n)) score += n === coreName ? 5 : 2;
+      }
+      if (score > 0) scored.push({ q, score });
+    }
+    return scored
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map((item) => item.q);
   }
 
   // ==================== ADMIN DICTIONARY MANAGEMENT ====================

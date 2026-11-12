@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+/* ================= Design tokens: typography scale (V7) ================= */
+@theme {
+  --text-meta: 0.6875rem;          /* 11px - metadatos, etiquetas */
+  --text-meta--line-height: 1rem;
+  --text-caption: 0.75rem;         /* 12px - textos secundarios */
+  --text-caption--line-height: 1.125rem;
+  --text-body: 0.875rem;           /* 14px - cuerpo */
+  --text-body--line-height: 1.45rem;
+  --text-title: 1rem;              /* 16px - títulos de tarjeta */
+  --text-title--line-height: 1.4rem;
+  --text-headline: 1.375rem;       /* 22px - títulos de sección */
+  --text-headline--line-height: 1.75rem;
+  --text-display: 1.875rem;        /* 30px - hero */
+  --text-display--line-height: 2.2rem;
+}
+
 @layer base {
   :root {
     --color-primary: #5149B8;
@@ -16,6 +32,18 @@
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     background-color: var(--color-bg-soft);
     color: var(--color-text-main);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.015em;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 }
 
@@ -41,3 +69,224 @@
   -webkit-backdrop-filter: blur(16px);
   box-shadow: 0 12px 32px -4px rgba(32, 39, 68, 0.12);
 }
+
+/* ================= Enter animations (V4) ================= */
+/* Compatible with existing class names: animate-in fade-in zoom-in-95 slide-in-from-* */
+.animate-in {
+  --uc-enter-opacity: 1;
+  --uc-enter-scale: 1;
+  --uc-enter-tx: 0;
+  --uc-enter-ty: 0;
+  animation: uc-enter var(--tw-duration, 200ms) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.fade-in { --uc-enter-opacity: 0; }
+.zoom-in-95 { --uc-enter-scale: 0.95; }
+.slide-in-from-right { --uc-enter-tx: 100%; }
+.slide-in-from-top-2 { --uc-enter-ty: -0.5rem; }
+.slide-in-from-bottom-2 { --uc-enter-ty: 0.5rem; }
+
+@keyframes uc-enter {
+  from {
+    opacity: var(--uc-enter-opacity);
+    transform: translate3d(var(--uc-enter-tx), var(--uc-enter-ty), 0) scale(var(--uc-enter-scale));
+  }
+}
+
+/* Page transition for routed content */
+.uc-page-enter {
+  animation: uc-page-enter 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes uc-page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+/* Staggered list items */
+.uc-stagger > * {
+  animation: uc-page-enter 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.uc-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.uc-stagger > *:nth-child(2) { animation-delay: 40ms; }
+.uc-stagger > *:nth-child(3) { animation-delay: 80ms; }
+.uc-stagger > *:nth-child(4) { animation-delay: 120ms; }
+.uc-stagger > *:nth-child(5) { animation-delay: 160ms; }
+.uc-stagger > *:nth-child(6) { animation-delay: 200ms; }
+.uc-stagger > *:nth-child(7) { animation-delay: 240ms; }
+.uc-stagger > *:nth-child(8) { animation-delay: 280ms; }
+.uc-stagger > *:nth-child(n + 9) { animation-delay: 320ms; }
+
+/* Wrong answer shake */
+.uc-shake {
+  animation: uc-shake 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+@keyframes uc-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(3px); }
+  30%, 50%, 70% { transform: translateX(-6px); }
+  40%, 60% { transform: translateX(6px); }
+}
+
+/* Correct answer pop */
+.uc-pop {
+  animation: uc-pop 380ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes uc-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+/* Floating "+N pts" */
+.uc-float-up {
+  animation: uc-float-up 1.4s ease-out both;
+}
+@keyframes uc-float-up {
+  0% { opacity: 0; transform: translateY(6px) scale(0.85); }
+  20% { opacity: 1; transform: translateY(0) scale(1.08); }
+  35% { transform: translateY(0) scale(1); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Confetti */
+.uc-confetti-piece {
+  position: absolute;
+  top: -16px;
+  opacity: 0;
+  animation-name: uc-confetti-fall;
+  animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation-fill-mode: forwards;
+}
+@keyframes uc-confetti-fall {
+  0% { opacity: 1; transform: translate3d(0, 0, 0) rotate(0deg); }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(var(--uc-drift, 0), 105vh, 0) rotate(var(--uc-rotate, 720deg)); }
+}
+
+/* Progress bar fill-in */
+.uc-bar-fill {
+  animation: uc-bar-fill 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: left center;
+}
+@keyframes uc-bar-fill {
+  from { transform: scaleX(0); }
+}
+
+/* ================= Skeleton shimmer (V5) ================= */
+.uc-skeleton {
+  background: linear-gradient(90deg, #ECEEF6 0%, #F7F8FC 40%, #ECEEF6 80%);
+  background-size: 200% 100%;
+  animation: uc-shimmer 1.3s ease-in-out infinite;
+}
+@keyframes uc-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+/* Accessibility: reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-in,
+  .uc-page-enter,
+  .uc-stagger > *,
+  .uc-shake,
+  .uc-pop,
+  .uc-float-up,
+  .uc-bar-fill,
+  .uc-skeleton {
+    animation: none !important;
+  }
+  .uc-confetti-piece {
+    display: none;
+  }
+}
+
+/* ================= Dark Mode Theme (V3) ================= */
+html.dark {
+  --color-bg-soft: #0E1324;
+  --color-text-main: #EDF1FF;
+  --color-text-muted: #9BA6C7;
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0E1324;
+  color: #EDF1FF;
+}
+
+html.dark .bg-mesh-violet {
+  background: radial-gradient(circle at 15% 15%, rgba(119, 120, 237, 0.18) 0%, transparent 45%),
+              radial-gradient(circle at 85% 25%, rgba(131, 208, 229, 0.12) 0%, transparent 50%),
+              linear-gradient(180deg, #0B1020 0%, #0E1324 60%, #11172B 100%);
+}
+
+html.dark .card-soft-shadow {
+  box-shadow: 0 12px 32px -6px rgba(0, 0, 0, 0.45), 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+}
+
+html.dark .glass-nav {
+  background: rgba(22, 29, 53, 0.92);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.55);
+}
+
+html.dark .bg-white {
+  background-color: #161D35 !important;
+}
+
+html.dark .bg-white\/90,
+html.dark .bg-white\/80,
+html.dark .bg-white\/70,
+html.dark .bg-white\/60 {
+  background-color: rgba(22, 29, 53, 0.88) !important;
+}
+
+html.dark .bg-\[\#F5F7FC\] {
+  background-color: #1E2746 !important;
+}
+
+html.dark .text-\[\#202744\],
+html.dark .text-\[\#202744\]\/80,
+html.dark .text-\[\#202744\]\/75 {
+  color: #EDF1FF !important;
+}
+
+/* Preserve dark text when inside bright lime/cyan badges or pills */
+html.dark .bg-\[\#C3F574\].text-\[\#202744\],
+html.dark .bg-\[\#C3F574\]\/80.text-\[\#202744\],
+html.dark .bg-\[\#C3F574\]\/60.text-\[\#202744\],
+html.dark .bg-\[\#83D0E5\].text-\[\#202744\],
+html.dark .bg-amber-300.text-\[\#202744\],
+html.dark .bg-\[\#C3F574\] .text-\[\#202744\] {
+  color: #13182B !important;
+}
+
+html.dark .text-\[\#858BA1\] {
+  color: #9BA6C7 !important;
+}
+
+html.dark .text-\[\#5149B8\] {
+  color: #A5A6FF !important;
+}
+
+html.dark .border-white,
+html.dark .border-white\/80,
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-slate-200\/80,
+html.dark .border-slate-200\/70 {
+  border-color: rgba(255, 255, 255, 0.09) !important;
+}
+
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark input,
+html.dark select,
+html.dark textarea {
+  color: #EDF1FF;
+}
+
+html.dark .uc-skeleton {
+  background: linear-gradient(90deg, #1B2340 0%, #253056 40%, #1B2340 80%);
+  background-size: 200% 100%;
+}
+

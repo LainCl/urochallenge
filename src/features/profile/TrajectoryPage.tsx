@@ -80,7 +80,7 @@ export const TrajectoryPage: React.FC = () => {
             <span className="text-3xl font-black text-[#C3F574] block">
               {progression.totalXp.toLocaleString('es-CL')} XP
             </span>
-            <span className="text-[11px] text-white/75 flex items-center sm:justify-end gap-1 mt-1">
+            <span className="text-meta text-white/75 flex items-center sm:justify-end gap-1 mt-1">
               <Coins className="w-3.5 h-3.5 text-[#83D0E5]" /> Saldo canjeable independiente:{' '}
               {stats.currentBalance} pts
             </span>
@@ -195,7 +195,7 @@ export const TrajectoryPage: React.FC = () => {
                         {lvl.benefits.map((b, i) => (
                           <span
                             key={i}
-                            className="px-2.5 py-0.5 rounded-lg bg-[#F5F7FC] border border-slate-200/80 text-[11px] font-semibold text-[#202744]"
+                            className="px-2.5 py-0.5 rounded-lg bg-[#F5F7FC] border border-slate-200/80 text-meta font-semibold text-[#202744]"
                           >
                             {b}
                           </span>
@@ -212,7 +212,7 @@ export const TrajectoryPage: React.FC = () => {
                         <CheckCircle2 className="w-4 h-4" /> Desbloqueado
                       </span>
                       {histEntry && (
-                        <span className="text-[11px] text-[#858BA1] mt-0.5">
+                        <span className="text-meta text-[#858BA1] mt-0.5">
                           Alcanzado el{' '}
                           {format(new Date(histEntry.reached_at), "d 'de' MMM yyyy", {
                             locale: es,
@@ -225,7 +225,7 @@ export const TrajectoryPage: React.FC = () => {
                       <span className="inline-flex items-center gap-1 text-xs font-extrabold text-[#858BA1]">
                         <Lock className="w-3.5 h-3.5" /> Faltan {missingXp.toLocaleString('es-CL')} XP
                       </span>
-                      <span className="text-[11px] text-[#858BA1] mt-0.5">
+                      <span className="text-meta text-[#858BA1] mt-0.5">
                         Requisito: {lvl.min_xp.toLocaleString('es-CL')} XP
                       </span>
                     </div>
@@ -273,7 +273,7 @@ export const TrajectoryPage: React.FC = () => {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-1 mb-0.5">
                   <span
-                    className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                    className={`text-meta font-extrabold uppercase px-2 py-0.5 rounded-full ${
                       ach.unlocked
                         ? 'bg-[#C3F574] text-[#202744]'
                         : 'bg-slate-200 text-slate-600'
@@ -282,14 +282,14 @@ export const TrajectoryPage: React.FC = () => {
                     {ach.unlocked ? 'Desbloqueado' : `${ach.progress} / ${ach.target}`}
                   </span>
                   {ach.unlocked_at && (
-                    <span className="text-[10px] text-white/60">
+                    <span className="text-meta text-white/60">
                       {format(new Date(ach.unlocked_at), 'dd/MM/yyyy')}
                     </span>
                   )}
                 </div>
                 <h4 className="text-xs sm:text-sm font-extrabold leading-snug">{ach.name}</h4>
                 <p
-                  className={`text-[11px] mt-0.5 leading-relaxed ${
+                  className={`text-meta mt-0.5 leading-relaxed ${
                     ach.unlocked ? 'text-white/75' : 'text-[#858BA1]'
                   }`}
                 >
@@ -321,7 +321,7 @@ export const TrajectoryPage: React.FC = () => {
                   <span className="font-extrabold text-[#5149B8] block">
                     Nivel {h.roman_numeral} — {h.level_name}
                   </span>
-                  <span className="text-[11px] text-[#858BA1]">Hito de trayectoria</span>
+                  <span className="text-meta text-[#858BA1]">Hito de trayectoria</span>
                 </div>
                 <span className="font-bold text-[#202744]">
                   {format(new Date(h.reached_at), "d 'de' MMM yyyy, HH:mm", { locale: es })}
@@ -377,7 +377,7 @@ export const TrajectoryPage: React.FC = () => {
             >
               <div>
                 <p className="font-bold text-[#202744]">{entry.description}</p>
-                <p className="text-[11px] text-[#858BA1]">
+                <p className="text-meta text-[#858BA1]">
                   {format(new Date(entry.created_at), "d 'de' MMM yyyy, HH:mm", { locale: es })}
                 </p>
               </div>

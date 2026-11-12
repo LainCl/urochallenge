@@ -23,6 +23,7 @@ import { useApp } from '../../app/providers';
 import { uroRepository } from '../../services/uroRepository';
 import { UrologyTermEnriched } from '../../types/domain';
 import { CategoryIcon } from '../../components/common/CategoryIcon';
+import { DictionaryFlashcardsModal } from './DictionaryFlashcardsModal';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -83,6 +84,7 @@ export const DictionaryMainPage: React.FC = () => {
   );
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(initialCat);
   const [tick, setTick] = useState(0);
+  const [isFlashcardsOpen, setIsFlashcardsOpen] = useState(false);
 
   // Debounce search input (200ms)
   useEffect(() => {
@@ -176,7 +178,7 @@ export const DictionaryMainPage: React.FC = () => {
               <BookOpen className="w-7 h-7" />
             </div>
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#5149B8]/10 text-[#5149B8] text-[11px] font-extrabold uppercase tracking-wider mb-1">
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#5149B8]/10 text-[#5149B8] text-meta font-extrabold uppercase tracking-wider mb-1">
                 <Sparkles className="w-3 h-3" />
                 Biblioteca Académica de Consulta
               </div>
@@ -194,13 +196,13 @@ export const DictionaryMainPage: React.FC = () => {
               <span className="text-base font-black text-[#5149B8] block leading-none">
                 {allPublishedTerms.length}
               </span>
-              <span className="text-[10px] font-bold text-[#858BA1] uppercase">Términos</span>
+              <span className="text-meta font-bold text-[#858BA1] uppercase">Términos</span>
             </div>
             <div className="px-3.5 py-2 rounded-2xl bg-[#F5F7FC] border border-slate-100 text-center">
               <span className="text-base font-black text-[#202744] block leading-none">
                 {categories.length}
               </span>
-              <span className="text-[10px] font-bold text-[#858BA1] uppercase">Categorías</span>
+              <span className="text-meta font-bold text-[#858BA1] uppercase">Categorías</span>
             </div>
           </div>
         </div>
@@ -239,7 +241,7 @@ export const DictionaryMainPage: React.FC = () => {
 
           {/* Quick Search Chips */}
           <div className="flex flex-wrap items-center gap-1.5 mt-3">
-            <span className="text-[11px] font-bold text-[#858BA1] mr-1">Búsquedas rápidas:</span>
+            <span className="text-meta font-bold text-[#858BA1] mr-1">Búsquedas rápidas:</span>
             {quickSearchSuggestions.map((sug) => (
               <button
                 key={sug}
@@ -248,7 +250,7 @@ export const DictionaryMainPage: React.FC = () => {
                   setInputQuery(sug);
                   setActiveTab('all');
                 }}
-                className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition cursor-pointer ${
+                className={`px-2.5 py-1 rounded-full text-meta font-bold transition cursor-pointer ${
                   inputQuery.toLowerCase() === sug.toLowerCase()
                     ? 'bg-[#5149B8] text-white'
                     : 'bg-[#F5F7FC] hover:bg-[#5149B8]/10 text-[#5149B8]'
@@ -329,19 +331,31 @@ export const DictionaryMainPage: React.FC = () => {
           </button>
         </div>
 
-        {selectedCategoryId && (
+        <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => handleSelectCategory(null)}
-            className="px-3.5 py-2 rounded-full bg-[#C3F574] text-[#202744] text-xs font-extrabold flex items-center gap-1.5 shadow-xs cursor-pointer"
+            onClick={() => setIsFlashcardsOpen(true)}
+            disabled={filteredTerms.length === 0 && allPublishedTerms.length === 0}
+            className="px-4 py-2.5 rounded-full bg-[#C3F574] hover:bg-[#b5eb60] text-[#202744] text-xs font-extrabold flex items-center gap-1.5 shadow-sm transition cursor-pointer"
           >
-            <span>
-              Categoría:{' '}
-              {categories.find((c) => c.id === selectedCategoryId)?.name || 'Seleccionada'}
-            </span>
-            <X className="w-3.5 h-3.5" />
+            <Layers className="w-4 h-4 text-[#5149B8]" />
+            <span>Modo Flashcards</span>
           </button>
-        )}
+
+          {selectedCategoryId && (
+            <button
+              type="button"
+              onClick={() => handleSelectCategory(null)}
+              className="px-3.5 py-2 rounded-full bg-[#C3F574] text-[#202744] text-xs font-extrabold flex items-center gap-1.5 shadow-xs cursor-pointer"
+            >
+              <span>
+                Categoría:{' '}
+                {categories.find((c) => c.id === selectedCategoryId)?.name || 'Seleccionada'}
+              </span>
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* TAB: 14 CATEGORIES GRID */}
@@ -540,7 +554,7 @@ export const DictionaryMainPage: React.FC = () => {
                       <h3 className="text-sm font-extrabold text-[#202744]">{term.term}</h3>
                       {term.category && (
                         <span
-                          className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold text-white"
+                          className="px-2.5 py-0.5 rounded-full text-meta font-extrabold text-white"
                           style={{ backgroundColor: term.category.color || '#5149B8' }}
                         >
                           {term.category.name}
@@ -548,7 +562,7 @@ export const DictionaryMainPage: React.FC = () => {
                       )}
                     </div>
                     <p className="text-xs text-[#858BA1] line-clamp-1">{term.short_definition}</p>
-                    <span className="text-[11px] font-semibold text-slate-400 block mt-1">
+                    <span className="text-meta font-semibold text-slate-400 block mt-1">
                       Consultado el{' '}
                       {format(new Date(view.viewed_at), "d 'de' MMM yyyy, HH:mm", { locale: es })}
                     </span>
@@ -571,6 +585,24 @@ export const DictionaryMainPage: React.FC = () => {
             </div>
           )}
         </section>
+      )}
+
+      {isFlashcardsOpen && (
+        <DictionaryFlashcardsModal
+          terms={
+            filteredTerms.length > 0 && (activeTab === 'all' || activeTab === 'favorites')
+              ? filteredTerms
+              : allPublishedTerms
+          }
+          title={
+            activeTab === 'favorites'
+              ? 'Mis Favoritos'
+              : selectedCategoryId
+                ? categories.find((c) => c.id === selectedCategoryId)?.name || 'Diccionario'
+                : 'Diccionario Urológico (20 tarjetas)'
+          }
+          onClose={() => setIsFlashcardsOpen(false)}
+        />
       )}
     </div>
   );
@@ -595,7 +627,7 @@ const TermListCard: React.FC<{
           <div className="flex flex-wrap items-center gap-1.5">
             {term.category && (
               <span
-                className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold text-white"
+                className="px-2.5 py-0.5 rounded-full text-meta font-extrabold text-white"
                 style={{ backgroundColor: term.category.color || '#5149B8' }}
               >
                 {term.category.name}
@@ -604,7 +636,7 @@ const TermListCard: React.FC<{
             {abbreviations.map((ab) => (
               <span
                 key={ab.id}
-                className="px-2 py-0.5 rounded-md bg-[#83D0E5]/25 text-[#202744] text-[11px] font-black"
+                className="px-2 py-0.5 rounded-md bg-[#83D0E5]/25 text-[#202744] text-meta font-black"
               >
                 <HighlightedText text={ab.alias} query={query} />
               </span>
@@ -631,7 +663,7 @@ const TermListCard: React.FC<{
         </h3>
 
         {synonyms.length > 0 && (
-          <p className="text-[11px] font-semibold text-[#5149B8] mt-0.5">
+          <p className="text-meta font-semibold text-[#5149B8] mt-0.5">
             Sinónimos:{' '}
             {synonyms.map((s, idx) => (
               <React.Fragment key={s.id}>
@@ -654,7 +686,7 @@ const TermListCard: React.FC<{
               loading="lazy"
               className="w-16 h-12 object-contain rounded-xl bg-white border border-slate-200/70 shrink-0"
             />
-            <span className="text-[11px] font-bold text-[#5149B8] leading-snug">
+            <span className="text-meta font-bold text-[#5149B8] leading-snug">
               Incluye fotografía / esquema clínico de la literatura
               {term.gallery_urls && term.gallery_urls.length > 1
                 ? ` (${term.gallery_urls.length} figuras)`
@@ -665,7 +697,7 @@ const TermListCard: React.FC<{
       </div>
 
       <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-semibold">
+        <div className="flex items-center gap-1.5 text-meta text-slate-400 font-semibold">
           {term.related_terms.length > 0 && (
             <span>{term.related_terms.length} término(s) relacionado(s)</span>
           )}
@@ -881,7 +913,7 @@ export const DictionaryTermDetailPage: React.FC = () => {
 
         {/* Short Definition Highlight Box */}
         <div className="rounded-3xl bg-gradient-to-br from-[#5149B8]/8 to-[#83D0E5]/15 p-5 sm:p-6 border border-[#5149B8]/15">
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#5149B8] block mb-1.5">
+          <span className="text-meta font-extrabold uppercase tracking-wider text-[#5149B8] block mb-1.5">
             Definición Breve
           </span>
           <p className="text-sm sm:text-base font-bold text-[#202744] leading-relaxed">
@@ -938,7 +970,7 @@ export const DictionaryTermDetailPage: React.FC = () => {
                         href={img.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[11px] font-extrabold text-[#5149B8] hover:underline inline-flex items-center gap-1 shrink-0"
+                        className="text-meta font-extrabold text-[#5149B8] hover:underline inline-flex items-center gap-1 shrink-0"
                       >
                         <span>Ampliar</span>
                         <ExternalLink className="w-3 h-3" />
@@ -973,7 +1005,7 @@ export const DictionaryTermDetailPage: React.FC = () => {
         {/* Complementary Metadata: Synonyms, Abbreviations & Tags */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
           <div className="bg-[#F5F7FC] rounded-2xl p-4 border border-slate-100">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#858BA1] block mb-2">
+            <span className="text-meta font-extrabold uppercase tracking-wider text-[#858BA1] block mb-2">
               Abreviaturas
             </span>
             {abbreviations.length === 0 ? (
@@ -993,7 +1025,7 @@ export const DictionaryTermDetailPage: React.FC = () => {
           </div>
 
           <div className="bg-[#F5F7FC] rounded-2xl p-4 border border-slate-100">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#858BA1] block mb-2">
+            <span className="text-meta font-extrabold uppercase tracking-wider text-[#858BA1] block mb-2">
               Sinónimos y Nombres Alternativos
             </span>
             {synonyms.length === 0 && altNames.length === 0 ? (
@@ -1013,7 +1045,7 @@ export const DictionaryTermDetailPage: React.FC = () => {
           </div>
 
           <div className="bg-[#F5F7FC] rounded-2xl p-4 border border-slate-100">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#858BA1] block mb-2">
+            <span className="text-meta font-extrabold uppercase tracking-wider text-[#858BA1] block mb-2">
               Etiquetas Clínicas
             </span>
             {term.tags.length === 0 ? (
@@ -1107,7 +1139,7 @@ export const DictionaryTermDetailPage: React.FC = () => {
                 className="p-4 rounded-2xl bg-[#F5F7FC] hover:bg-[#5149B8] text-[#202744] hover:text-white border border-slate-100 transition group flex flex-col justify-between gap-2"
               >
                 <div>
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#5149B8] group-hover:text-[#C3F574] block">
+                  <span className="text-meta font-extrabold uppercase tracking-wider text-[#5149B8] group-hover:text-[#C3F574] block">
                     {rel.category_name}
                   </span>
                   <h3 className="text-sm font-extrabold mt-0.5">{rel.term}</h3>
@@ -1124,6 +1156,63 @@ export const DictionaryTermDetailPage: React.FC = () => {
           </div>
         </section>
       )}
+
+      {/* Related Quiz Questions (F6) */}
+      {(() => {
+        const relatedQs = uroRepository.getQuestionsRelatedToDictionaryTerm(
+          term.term,
+          term.aliases.map((a) => a.alias),
+          term.tags.map((tg) => tg.tag),
+          3
+        );
+        if (relatedQs.length === 0) return null;
+        return (
+          <section className="bg-white rounded-[32px] p-6 sm:p-7 card-soft-shadow border border-white space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-extrabold text-[#202744]">
+                  Pon a prueba este concepto ({relatedQs.length} preguntas relacionadas)
+                </h2>
+                <p className="text-xs text-[#858BA1]">
+                  Preguntas del banco clínico que evalúan o mencionan este tema.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate('/app/quiz')}
+                className="px-4 py-2 rounded-full bg-[#5149B8] hover:bg-[#41399e] text-white text-xs font-extrabold flex items-center gap-1.5 transition shrink-0 cursor-pointer self-start sm:self-auto"
+              >
+                <span>Ir a Test de 10 preguntas</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <div className="space-y-2.5">
+              {relatedQs.map((rq) => (
+                <div
+                  key={rq.id}
+                  onClick={() => navigate(`/app/quiz?category=${rq.category_id}`)}
+                  className="p-4 rounded-2xl bg-[#F5F7FC] hover:bg-[#5149B8]/8 border border-slate-100 hover:border-[#5149B8]/30 transition cursor-pointer flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0">
+                    <span className="text-meta font-extrabold uppercase tracking-wider text-[#5149B8] block mb-0.5">
+                      Nivel{' '}
+                      {rq.difficulty === 'basic'
+                        ? 'Básico'
+                        : rq.difficulty === 'intermediate'
+                          ? 'Intermedio'
+                          : 'Avanzado'}
+                    </span>
+                    <p className="text-xs sm:text-sm font-bold text-[#202744] line-clamp-2">
+                      {rq.question_text}
+                    </p>
+                  </div>
+                  <ArrowUpRight className="w-4 h-4 text-[#5149B8] shrink-0" />
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
     </div>
   );
 };

@@ -300,7 +300,7 @@ export const AdminGamificationPage: React.FC = () => {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="px-2.5 py-0.5 rounded-full bg-[#5149B8]/10 text-[#5149B8] text-[11px] font-extrabold uppercase">
+                      <span className="px-2.5 py-0.5 rounded-full bg-[#5149B8]/10 text-[#5149B8] text-meta font-extrabold uppercase">
                         Nivel {lvl.roman_numeral} (#{lvl.level_number})
                       </span>
                       <button
@@ -324,14 +324,14 @@ export const AdminGamificationPage: React.FC = () => {
 
                 {lvl.benefits && lvl.benefits.length > 0 && (
                   <div className="pt-3 border-t border-slate-100">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                    <p className="text-meta font-bold uppercase tracking-wider text-slate-400 mb-1.5">
                       Beneficios del nivel
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {lvl.benefits.map((b, i) => (
                         <span
                           key={i}
-                          className="text-[11px] bg-slate-50 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200/60"
+                          className="text-meta bg-slate-50 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200/60"
                         >
                           {b}
                         </span>
@@ -415,7 +415,7 @@ export const AdminGamificationPage: React.FC = () => {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      className={`text-meta font-bold px-2 py-0.5 rounded-full ${
                         ach.is_active
                           ? 'bg-emerald-50 text-emerald-700'
                           : 'bg-slate-100 text-slate-500'
@@ -433,7 +433,7 @@ export const AdminGamificationPage: React.FC = () => {
                   </div>
                   <h3 className="text-sm font-extrabold text-[#202744] mt-1">{ach.name}</h3>
                   <p className="text-xs text-[#858BA1] mt-0.5">{ach.description}</p>
-                  <div className="mt-2 flex items-center gap-2 text-[11px] font-semibold text-[#5149B8]">
+                  <div className="mt-2 flex items-center gap-2 text-meta font-semibold text-[#5149B8]">
                     <span>Meta: {ach.condition_value}</span>
                     <span>•</span>
                     <span>Tipo: {ach.condition_type}</span>
@@ -562,7 +562,7 @@ export const AdminGamificationPage: React.FC = () => {
                       <div key={entry.id} className="py-3 flex items-center justify-between gap-4">
                         <div className="min-w-0">
                           <p className="text-xs font-bold text-[#202744]">{entry.description}</p>
-                          <p className="text-[11px] text-[#858BA1]">
+                          <p className="text-meta text-[#858BA1]">
                             {format(new Date(entry.created_at), "d 'de' MMM yyyy, HH:mm", {
                               locale: es,
                             })}{' '}
@@ -898,7 +898,7 @@ const RuleRow: React.FC<{
       <div>
         <div className="flex items-center gap-2">
           <p className="text-sm font-bold text-[#202744]">{rule.description}</p>
-          <span className="text-[11px] font-mono bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md">
+          <span className="text-meta font-mono bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md">
             {rule.action_key}
           </span>
         </div>

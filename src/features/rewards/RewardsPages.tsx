@@ -297,13 +297,13 @@ export const RewardsCatalogPage: React.FC = () => {
                         {red.redemption_code}
                       </span>
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold ${badge.className}`}
+                        className={`px-2.5 py-0.5 rounded-full text-meta font-extrabold ${badge.className}`}
                       >
                         {badge.label}
                       </span>
                     </div>
                     <h4 className="text-sm font-extrabold text-[#202744]">{red.reward_name}</h4>
-                    <p className="text-[11px] text-[#858BA1]">
+                    <p className="text-meta text-[#858BA1]">
                       Canjeado el{' '}
                       {format(new Date(red.created_at), "d 'de' MMM yyyy, HH:mm", { locale: es })}
                       {red.admin_note ? ` • Nota: ${red.admin_note}` : ''}
@@ -430,14 +430,14 @@ export const RewardDetailPage: React.FC = () => {
             <span className="block text-base font-extrabold text-[#202744]">
               {reward.points_cost} pts
             </span>
-            <span className="block text-[11px] text-[#858BA1]">Costo requerido</span>
+            <span className="block text-meta text-[#858BA1]">Costo requerido</span>
           </div>
           <div className="bg-[#F5F7FC] rounded-2xl p-4 text-center">
             <Package className="w-5 h-5 text-[#5149B8] mx-auto mb-1" />
             <span className="block text-base font-extrabold text-[#202744]">
               {reward.stock === null ? 'Ilimitado' : `${reward.stock} unid.`}
             </span>
-            <span className="block text-[11px] text-[#858BA1]">Disponibilidad</span>
+            <span className="block text-meta text-[#858BA1]">Disponibilidad</span>
           </div>
           <div className="bg-[#F5F7FC] rounded-2xl p-4 text-center">
             {isUnlockedInAlbum ? (
@@ -456,7 +456,7 @@ export const RewardDetailPage: React.FC = () => {
                 ? 'Habilitado'
                 : `-${reward.points_cost - stats.currentBalance} pts`}
             </span>
-            <span className="block text-[11px] text-[#858BA1]">Estado</span>
+            <span className="block text-meta text-[#858BA1]">Estado</span>
           </div>
         </div>
 

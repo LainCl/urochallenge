@@ -9,6 +9,8 @@ interface AppContextValue {
   progression: UserProgressionSummary | null;
   settings: AppSettings;
   isDemoMode: boolean;
+  theme: 'light' | 'dark';
+  toggleTheme: () => void;
   refreshData: () => void;
   acknowledgeLevelUps: (historyIds?: string[]) => void;
   loginAsDemo: (roleOrUserId: 'user' | 'admin' | string) => Profile;
@@ -39,6 +41,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return current ? uroRepository.getUserProgression(current.id) : null;
   });
   const [settings, setSettings] = useState<AppSettings>(() => uroRepository.getAppSettings());
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    try {
+      const saved = localStorage.getItem('urochallenge_theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+    } catch {
+      // ignore storage errors
+    }
+    return 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    try {
+      localStorage.setItem('urochallenge_theme', theme);
+    } catch {
+      // ignore storage errors
+    }
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  }, []);
 
   const refreshData = useCallback(() => {
     const current = uroRepository.getCurrentUser();
@@ -135,6 +159,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         progression,
         settings,
         isDemoMode: !isSupabaseConfigured,
+        theme,
+        toggleTheme,
         refreshData,
         acknowledgeLevelUps,
         loginAsDemo,

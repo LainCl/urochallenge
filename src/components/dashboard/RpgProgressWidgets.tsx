@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sparkles, ArrowUpRight, Award, ShieldCheck } from 'lucide-react';
 import { UserProgressionSummary } from '../../types/domain';
 import { AchievementBadgeIcon } from '../rewards/AchievementBadgeIcon';
+import { ConfettiBurst } from '../common/Motion';
 import { uroRepository } from '../../services/uroRepository';
 
 export const MyProgressRpgCard: React.FC<{
@@ -32,10 +33,10 @@ export const MyProgressRpgCard: React.FC<{
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="px-3 py-0.5 rounded-full bg-[#5149B8]/10 text-[#5149B8] text-[11px] font-extrabold uppercase tracking-wider">
+              <span className="px-3 py-0.5 rounded-full bg-[#5149B8]/10 text-[#5149B8] text-meta font-extrabold uppercase tracking-wider">
                 Mi Progreso RPG
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-[#83D0E5]/30 text-[#202744] text-[11px] font-extrabold">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#83D0E5]/30 text-[#202744] text-meta font-extrabold">
                 {levelProgressPercentage}% de avance
               </span>
             </div>
@@ -96,7 +97,7 @@ export const MyProgressRpgCard: React.FC<{
               ¡Has alcanzado el nivel máximo de maestría en UroChallenge!
             </span>
           )}
-          <span className="text-[11px] text-[#858BA1]">
+          <span className="text-meta text-[#858BA1]">
             La XP es permanente y no disminuye al canjear premios
           </span>
         </div>
@@ -121,6 +122,7 @@ export const LevelUpNotificationModal: React.FC<{
 
   return (
     <div className="fixed inset-0 z-50 bg-[#202744]/70 backdrop-blur-md flex items-center justify-center p-4">
+      <ConfettiBurst active={true} pieces={110} />
       <div className="bg-white rounded-[36px] max-w-md w-full p-7 sm:p-8 card-soft-shadow border border-white text-center relative animate-in fade-in zoom-in-95 duration-200">
         <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#C3F574] text-[#202744] text-xs font-extrabold uppercase tracking-wider mb-3">
           <Award className="w-4 h-4 text-[#5149B8]" />
@@ -151,7 +153,7 @@ export const LevelUpNotificationModal: React.FC<{
 
         {reachedEntries.length > 1 && (
           <div className="bg-[#F5F7FC] rounded-2xl p-3 mb-4 text-left border border-slate-200/70">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#5149B8] block mb-1.5">
+            <span className="text-meta font-extrabold uppercase tracking-wider text-[#5149B8] block mb-1.5">
               Niveles desbloqueados en esta actividad ({reachedEntries.length}):
             </span>
             <div className="space-y-1">
@@ -172,7 +174,7 @@ export const LevelUpNotificationModal: React.FC<{
 
         {levelDef.benefits && levelDef.benefits.length > 0 && (
           <div className="bg-[#5149B8]/6 rounded-2xl p-3.5 mb-6 text-left border border-[#5149B8]/15">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#5149B8] block mb-1">
+            <span className="text-meta font-extrabold uppercase tracking-wider text-[#5149B8] block mb-1">
               Distinciones del nivel:
             </span>
             <ul className="text-xs text-[#202744] space-y-1 font-medium">

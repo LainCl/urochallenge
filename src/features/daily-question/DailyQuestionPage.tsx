@@ -10,7 +10,11 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../app/providers';
 import { uroRepository } from '../../services/uroRepository';
-import { AnswerOption, QuestionResult } from '../../components/questions/QuestionComponents';
+import {
+  AnswerOption,
+  QuestionResult,
+  QuestionClinicalImage,
+} from '../../components/questions/QuestionComponents';
 import { EmptyState } from '../../components/common/FeedbackStates';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -115,7 +119,7 @@ export const DailyQuestionPage: React.FC = () => {
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div className="text-center">
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#5149B8] block">
+          <span className="text-meta font-extrabold uppercase tracking-wider text-[#5149B8] block">
             {schedule.name}
           </span>
           <h1 className="text-base font-extrabold text-[#202744]">Pregunta Periódica</h1>
@@ -135,7 +139,7 @@ export const DailyQuestionPage: React.FC = () => {
             <strong>+{potentialPoints.correctBonus} pts adicionales</strong> si respondes correctamente.
           </span>
         </div>
-        <span className="text-[11px] font-bold text-[#5149B8] bg-white px-2.5 py-0.5 rounded-full">
+        <span className="text-meta font-bold text-[#5149B8] bg-white px-2.5 py-0.5 rounded-full">
           Frecuencia: cada {schedule.interval_value}{' '}
           {schedule.interval_unit === 'days' ? 'día(s)' : 'hora(s)'}
         </span>
@@ -147,14 +151,19 @@ export const DailyQuestionPage: React.FC = () => {
           <span className="px-3 py-1 rounded-full bg-[#5149B8]/10 text-[#5149B8] text-xs font-extrabold">
             {category?.name || 'Urología'}
           </span>
-          <span className="px-2.5 py-1 rounded-full bg-slate-100 text-[#858BA1] text-[11px] font-bold uppercase">
+          <span className="px-2.5 py-1 rounded-full bg-slate-100 text-[#858BA1] text-meta font-bold uppercase">
             Nivel {question.difficulty === 'basic' ? 'Básico' : question.difficulty === 'intermediate' ? 'Intermedio' : 'Avanzado'}
           </span>
         </div>
 
-        <h2 className="text-lg sm:text-xl font-extrabold text-[#202744] leading-snug mb-6">
+        <h2 className="text-lg sm:text-xl font-extrabold text-[#202744] leading-snug mb-5">
           {question.question_text}
         </h2>
+
+        <QuestionClinicalImage
+          imageUrl={question.image_url}
+          caption={question.image_caption}
+        />
 
         <div className="space-y-3">
           {question.options
@@ -194,6 +203,7 @@ export const DailyQuestionPage: React.FC = () => {
               streakBonusAwarded={submissionResult.streakBonusAwarded}
               explanation={submissionResult.explanation}
               referenceText={submissionResult.referenceText}
+              relatedTerms={uroRepository.findRelatedDictionaryTermsForQuestion(question)}
             />
 
             <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">

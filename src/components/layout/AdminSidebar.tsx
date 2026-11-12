@@ -79,7 +79,7 @@ export const AdminSidebar: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-base font-extrabold tracking-tight">UroChallenge</h1>
-                <span className="text-[11px] text-[#83D0E5] font-semibold uppercase tracking-wider">
+                <span className="text-meta text-[#83D0E5] font-semibold uppercase tracking-wider">
                   Panel Administrativo
                 </span>
               </div>
@@ -121,7 +121,7 @@ export const AdminSidebar: React.FC = () => {
         <div className="hidden lg:block pt-6 border-t border-white/15">
           <div className="mb-4">
             <p className="text-xs font-bold text-white truncate">{user.display_name}</p>
-            <p className="text-[11px] text-white/60 truncate">{user.email}</p>
+            <p className="text-meta text-white/60 truncate">{user.email}</p>
           </div>
           <button
             type="button"

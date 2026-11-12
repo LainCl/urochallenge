@@ -31,7 +31,7 @@ export const RewardCard: React.FC<{
     >
       <div>
         <div className="flex items-center justify-between gap-2 mb-4">
-          <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#83D0E5]/25 text-[#202744]">
+          <span className="px-3 py-1 rounded-full text-meta font-bold bg-[#83D0E5]/25 text-[#202744]">
             {reward.category_label}
           </span>
           <span
@@ -154,7 +154,7 @@ export const RewardsAlbumSection: React.FC<{
               <Award className="w-7 h-7" />
             </div>
             <div>
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#83D0E5] block">
+              <span className="text-meta font-extrabold uppercase tracking-wider text-[#83D0E5] block">
                 Colección Oficial UroChallenge
               </span>
               <h2 className="text-xl sm:text-2xl font-extrabold">
@@ -187,7 +187,7 @@ export const RewardsAlbumSection: React.FC<{
       <section className="bg-white rounded-[32px] p-6 card-soft-shadow border border-white">
         <div className="flex items-center justify-between flex-wrap gap-2 mb-5">
           <div>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#5149B8]">
+            <span className="text-meta font-extrabold uppercase tracking-wider text-[#5149B8]">
               Sección 1 • Desbloqueo Automático por Mérito
             </span>
             <h3 className="text-lg font-extrabold text-[#202744]">
@@ -217,7 +217,7 @@ export const RewardsAlbumSection: React.FC<{
 
               <div className="w-full">
                 <span
-                  className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase mb-1.5 ${
+                  className={`inline-block px-2.5 py-0.5 rounded-full text-meta font-extrabold uppercase mb-1.5 ${
                     ach.unlocked
                       ? 'bg-[#C3F574] text-[#202744]'
                       : 'bg-slate-200 text-slate-600'
@@ -233,7 +233,7 @@ export const RewardsAlbumSection: React.FC<{
                   {ach.name}
                 </h4>
                 <p
-                  className={`text-[11px] leading-relaxed ${
+                  className={`text-meta leading-relaxed ${
                     ach.unlocked ? 'text-white/75' : 'text-[#858BA1]'
                   }`}
                 >
@@ -249,7 +249,7 @@ export const RewardsAlbumSection: React.FC<{
       <section className="bg-white rounded-[32px] p-6 card-soft-shadow border border-white">
         <div className="flex items-center justify-between flex-wrap gap-2 mb-5">
           <div>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#5149B8]">
+            <span className="text-meta font-extrabold uppercase tracking-wider text-[#5149B8]">
               Sección 2 • Colección Canjeable con Puntos
             </span>
             <h3 className="text-lg font-extrabold text-[#202744]">
@@ -277,7 +277,7 @@ export const RewardsAlbumSection: React.FC<{
                     : 'bg-[#F5F7FC] hover:bg-white text-[#858BA1] border-slate-200/80 hover:border-[#5149B8]/40'
                 }`}
               >
-                <div className="w-full flex items-center justify-between text-[10px] font-extrabold mb-1">
+                <div className="w-full flex items-center justify-between text-meta font-extrabold mb-1">
                   <span
                     className={`px-2 py-0.5 rounded-full truncate ${
                       isUnlocked
@@ -318,7 +318,7 @@ export const RewardsAlbumSection: React.FC<{
                     {reward.name}
                   </h4>
                   <span
-                    className={`text-[11px] font-bold block ${
+                    className={`text-meta font-bold block ${
                       isUnlocked
                         ? 'text-[#C3F574]'
                         : canAfford
@@ -394,13 +394,13 @@ export const RewardRedemptionDialog: React.FC<{
             </p>
 
             <div className="bg-[#F5F7FC] rounded-2xl p-4 border-2 border-dashed border-[#5149B8]/30 mb-5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#858BA1] block mb-1">
+              <span className="text-meta font-bold uppercase tracking-wider text-[#858BA1] block mb-1">
                 Código Único de Comprobante
               </span>
               <span className="text-xl font-black tracking-widest text-[#5149B8]">
                 {completedRedemption.redemption_code}
               </span>
-              <span className="block text-[11px] text-[#858BA1] mt-1">
+              <span className="block text-meta text-[#858BA1] mt-1">
                 Estado inicial: Pendiente de entrega / validación
               </span>
             </div>
@@ -423,7 +423,7 @@ export const RewardRedemptionDialog: React.FC<{
                 size="sm"
               />
               <div>
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#5149B8] block">
+                <span className="text-meta font-extrabold uppercase tracking-wider text-[#5149B8] block">
                   {reward.category_label}
                 </span>
                 <h3 className="text-lg font-extrabold text-[#202744]">
@@ -453,7 +453,7 @@ export const RewardRedemptionDialog: React.FC<{
               </div>
             </div>
 
-            <div className="flex items-start gap-2 text-[11px] text-[#858BA1] bg-slate-50 p-3 rounded-xl mb-4">
+            <div className="flex items-start gap-2 text-meta text-[#858BA1] bg-slate-50 p-3 rounded-xl mb-4">
               <ShieldCheck className="w-4 h-4 text-[#5149B8] shrink-0 mt-0.5" />
               <span>Condiciones: {reward.conditions}</span>
             </div>

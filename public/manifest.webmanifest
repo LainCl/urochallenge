@@ -1,0 +1,20 @@
+{
+  "name": "UroChallenge — Aprendizaje Gamificado de Urología",
+  "short_name": "UroChallenge",
+  "description": "Plataforma académica y gamificada de urología clínica, casos encadenados, flashcards y diccionario visual.",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F5F7FC",
+  "theme_color": "#5149B8",
+  "lang": "es-CL",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

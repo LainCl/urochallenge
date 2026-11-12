@@ -182,7 +182,7 @@ export const AdminCategoriesPage: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <h3 className="text-sm font-extrabold text-[#202744]">{c.name}</h3>
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        className={`px-2 py-0.5 rounded-full text-meta font-bold ${
                           c.is_active
                             ? 'bg-emerald-100 text-emerald-800'
                             : 'bg-slate-200 text-slate-600'
@@ -192,7 +192,7 @@ export const AdminCategoriesPage: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-xs text-[#858BA1] mt-0.5">{c.description}</p>
-                    <span className="text-[11px] font-bold text-[#5149B8] mt-1 inline-block">
+                    <span className="text-meta font-bold text-[#5149B8] mt-1 inline-block">
                       {count} preguntas asociadas
                     </span>
                   </div>
@@ -414,11 +414,11 @@ export const AdminRewardsPage: React.FC = () => {
                   <span className="px-2.5 py-0.5 rounded-full bg-[#5149B8] text-white text-xs font-extrabold">
                     {r.points_cost} pts
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#83D0E5]/30 text-[#202744] text-[11px] font-bold">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#83D0E5]/30 text-[#202744] text-meta font-bold">
                     {r.category_label}
                   </span>
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    className={`px-2 py-0.5 rounded-full text-meta font-bold ${
                       r.is_active
                         ? 'bg-emerald-100 text-emerald-800'
                         : 'bg-slate-200 text-slate-600'
@@ -512,7 +512,7 @@ export const AdminRedemptionsPage: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h3 className="text-sm font-extrabold text-[#202744]">{r.reward_name}</h3>
-                  <p className="text-[11px] text-[#858BA1]">
+                  <p className="text-meta text-[#858BA1]">
                     Solicitado el{' '}
                     {format(new Date(r.created_at), "d 'de' MMM yyyy, HH:mm", { locale: es })}
                   </p>
@@ -620,7 +620,7 @@ export const AdminUsersPage: React.FC = () => {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="text-sm font-extrabold text-[#202744]">{p.display_name}</h3>
-                    <span className="px-2 py-0.5 rounded-full bg-[#5149B8]/10 text-[#5149B8] text-[10px] font-extrabold uppercase">
+                    <span className="px-2 py-0.5 rounded-full bg-[#5149B8]/10 text-[#5149B8] text-meta font-extrabold uppercase">
                       {p.role}
                     </span>
                   </div>
@@ -884,7 +884,7 @@ export const AdminSettingsPage: React.FC = () => {
               <span className="text-xs font-bold text-[#202744] block">
                 Permitir reintentos en la misma pregunta
               </span>
-              <span className="text-[11px] text-[#858BA1]">
+              <span className="text-meta text-[#858BA1]">
                 Por defecto desactivado para garantizar una única respuesta por período.
               </span>
             </div>
@@ -923,7 +923,7 @@ export const AdminSettingsPage: React.FC = () => {
                   <span className="text-xs font-extrabold text-[#202744] block">
                     {r.description}
                   </span>
-                  <span className="text-[10px] font-mono text-[#858BA1]">{r.action_key}</span>
+                  <span className="text-meta font-mono text-[#858BA1]">{r.action_key}</span>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
@@ -940,7 +940,7 @@ export const AdminSettingsPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => handleRuleUpdate(r.id, r.points, !r.is_active)}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg text-meta font-extrabold uppercase cursor-pointer ${
                       r.is_active
                         ? 'bg-emerald-100 text-emerald-800'
                         : 'bg-slate-200 text-slate-600'
@@ -984,12 +984,12 @@ export const AdminAuditPage: React.FC = () => {
             className="p-3.5 rounded-2xl bg-[#F5F7FC] border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
           >
             <div>
-              <span className="px-2.5 py-0.5 rounded-md bg-[#5149B8] text-white font-black text-[10px] uppercase mr-2">
+              <span className="px-2.5 py-0.5 rounded-md bg-[#5149B8] text-white font-black text-meta uppercase mr-2">
                 {log.action}
               </span>
               <span className="font-bold text-[#202744]">{log.details}</span>
             </div>
-            <div className="text-[11px] text-[#858BA1] shrink-0">
+            <div className="text-meta text-[#858BA1] shrink-0">
               {log.admin_name} •{' '}
               {format(new Date(log.created_at), "d 'de' MMM yyyy, HH:mm:ss", { locale: es })}
             </div>

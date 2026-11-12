@@ -208,7 +208,7 @@ export const StudyPomodoroPage: React.FC = () => {
                   <Timer className="w-5 h-5 text-[#C3F574]" />
                 </div>
                 <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-white/80 block">
+                  <span className="text-meta font-bold uppercase tracking-wider text-white/80 block">
                     Técnica de Estudio Clínico
                   </span>
                   <h2 className="text-lg font-extrabold">Temporizador Pomodoro</h2>
@@ -288,7 +288,7 @@ export const StudyPomodoroPage: React.FC = () => {
 
             {/* Study Category Selector */}
             <div className="mb-6">
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-white/80 mb-1.5">
+              <label className="block text-meta font-bold uppercase tracking-wider text-white/80 mb-1.5">
                 Módulo urológico que estás estudiando en este ciclo:
               </label>
               <select
@@ -463,7 +463,7 @@ export const StudyPomodoroPage: React.FC = () => {
                     <p className="text-xs sm:text-sm font-extrabold text-[#202744] truncate">
                       Ciclo Pomodoro ({item.duration_minutes} min) — {item.topic_label}
                     </p>
-                    <p className="text-[11px] text-[#858BA1]">
+                    <p className="text-meta text-[#858BA1]">
                       Completado el{' '}
                       {format(new Date(item.completed_at), "d 'de' MMM yyyy, HH:mm", {
                         locale: es,

@@ -143,7 +143,7 @@ export const LoginPage: React.FC = () => {
         {/* Registered Custom Accounts on this device */}
         {customAccounts.length > 0 && (
           <div className="mt-5 pt-4 border-t border-slate-100">
-            <div className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-[#5149B8] mb-2">
+            <div className="flex items-center gap-1.5 text-meta font-extrabold uppercase tracking-wider text-[#5149B8] mb-2">
               <Users className="w-3.5 h-3.5" />
               <span>Cuentas creadas en este dispositivo ({customAccounts.length})</span>
             </div>
@@ -159,9 +159,9 @@ export const LoginPage: React.FC = () => {
                     <span className="text-xs font-extrabold text-[#202744] block truncate">
                       {acc.display_name}
                     </span>
-                    <span className="text-[11px] text-[#858BA1] block truncate">{acc.email}</span>
+                    <span className="text-meta text-[#858BA1] block truncate">{acc.email}</span>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-[#5149B8] border border-[#5149B8]/20 shrink-0">
+                  <span className="text-meta font-bold px-2 py-0.5 rounded-full bg-white text-[#5149B8] border border-[#5149B8]/20 shrink-0">
                     Seleccionar
                   </span>
                 </button>
@@ -174,10 +174,10 @@ export const LoginPage: React.FC = () => {
         {isDemoMode && (
           <div className="bg-[#F5F7FC] rounded-3xl p-4 mt-5 border border-[#5149B8]/15 space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#5149B8]">
+              <span className="text-meta font-extrabold uppercase tracking-wider text-[#5149B8]">
                 Cuentas de Muestra (Modo Demo)
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-[#C3F574] text-[#202744] text-[10px] font-extrabold">
+              <span className="px-2 py-0.5 rounded-full bg-[#C3F574] text-[#202744] text-meta font-extrabold">
                 1 Clic
               </span>
             </div>
@@ -191,7 +191,7 @@ export const LoginPage: React.FC = () => {
                   <UserCheck className="w-4 h-4 text-[#5149B8] group-hover:text-[#C3F574]" />
                   <span>Usuario Muestra</span>
                 </div>
-                <span className="text-[11px] opacity-75 block truncate">Dra. Sofía Mendoza</span>
+                <span className="text-meta opacity-75 block truncate">Dra. Sofía Mendoza</span>
               </button>
 
               <button
@@ -203,7 +203,7 @@ export const LoginPage: React.FC = () => {
                   <ShieldCheck className="w-4 h-4 text-[#5149B8] group-hover:text-[#83D0E5]" />
                   <span>Admin Muestra</span>
                 </div>
-                <span className="text-[11px] opacity-75 block truncate">Dr. Carlos Valdivia</span>
+                <span className="text-meta opacity-75 block truncate">Dr. Carlos Valdivia</span>
               </button>
             </div>
           </div>
@@ -475,7 +475,7 @@ export const OnboardingPage: React.FC = () => {
                 >
                   <Icon className="w-5 h-5 text-[#5149B8] mx-auto mb-1.5" />
                   <span className="block text-sm font-extrabold text-[#202744]">{st.value}</span>
-                  <span className="block text-[11px] text-[#858BA1]">{st.label}</span>
+                  <span className="block text-meta text-[#858BA1]">{st.label}</span>
                 </div>
               );
             })}
