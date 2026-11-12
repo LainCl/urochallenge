@@ -13,6 +13,8 @@ import {
   BookOpen,
   Stethoscope,
   ClipboardList,
+  Calculator,
+  Box,
   Timer,
   Menu,
   ChevronRight,
@@ -63,6 +65,8 @@ export const AppShell: React.FC = () => {
     { to: '/app/daily-question', label: 'Pregunta Periódica', icon: Sparkles, end: false },
     { to: '/app/quiz', label: 'Test 10 Preguntas', icon: BookOpenCheck, end: false },
     { to: '/app/cases', label: 'Casos Clínicos', icon: ClipboardList, end: false },
+    { to: '/app/anatomy-3d', label: 'Anatomía 3D', icon: Box, end: false },
+    { to: '/app/calculators', label: 'Calculadoras Clínicas', icon: Calculator, end: false },
     { to: '/app/study', label: 'Estudio & Pomodoro', icon: Timer, end: false },
   ];
 

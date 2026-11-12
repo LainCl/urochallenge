@@ -18,6 +18,7 @@ import { PROSTATE_CANCER_QUESTIONS } from './prostateCancerQuestions';
 import { RENAL_CANCER_QUESTIONS } from './renalCancerQuestions';
 import { EXPANDED_PART1_QUESTIONS } from './expandedModulesQuestionsPart1';
 import { EXPANDED_PART2_QUESTIONS } from './expandedModulesQuestionsPart2';
+import { EXPANDED_PART3_QUESTIONS } from './expandedModulesQuestionsPart3';
 
 export const DEMO_USERS: Profile[] = [
   {
@@ -625,6 +626,7 @@ export const INITIAL_QUESTIONS: Question[] = [
   ...RENAL_CANCER_QUESTIONS,
   ...EXPANDED_PART1_QUESTIONS,
   ...EXPANDED_PART2_QUESTIONS,
+  ...EXPANDED_PART3_QUESTIONS,
 ];
 
 export const INITIAL_POINT_RULES: PointRule[] = [

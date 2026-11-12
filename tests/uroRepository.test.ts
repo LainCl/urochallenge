@@ -7,13 +7,13 @@ describe('UroChallenge Domain & Repository Engine', () => {
     uroRepository.resetDemoDatabase();
   });
 
-  it('1. Inicializa correctamente las 9 categorías, 282 preguntas (incluyendo próstata, renal y módulos expandidos) y 18 recompensas con insignias del álbum', () => {
+  it('1. Inicializa correctamente las 9 categorías, 332 preguntas (los 9 módulos completos) y 18 recompensas con insignias del álbum', () => {
     const categories = uroRepository.getCategories();
     const questions = uroRepository.getQuestions();
     const rewards = uroRepository.getRewards();
 
     expect(categories.length).toBe(9);
-    expect(questions.length).toBe(282);
+    expect(questions.length).toBe(332);
     const prostateQuestions = questions.filter((q) => q.id.startsWith('q-cap-'));
     expect(prostateQuestions.length).toBe(60);
     expect(prostateQuestions.filter((q) => q.difficulty === 'basic').length).toBe(30);

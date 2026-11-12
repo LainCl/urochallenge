@@ -47,6 +47,14 @@ const ClinicalCasesPage = named(
   () => import('../features/cases/ClinicalCasesPage'),
   'ClinicalCasesPage'
 );
+const CalculatorsPage = named(
+  () => import('../features/calculators/CalculatorsPage'),
+  'CalculatorsPage'
+);
+const Anatomy3DPage = named(
+  () => import('../features/anatomy/Anatomy3DPage'),
+  'Anatomy3DPage'
+);
 
 const AdminSidebar = named(() => import('../components/layout/AdminSidebar'), 'AdminSidebar');
 const AdminDashboardPage = named(loadAdminQuestions, 'AdminDashboardPage');
@@ -108,6 +116,8 @@ export const AppRouter: React.FC = () => {
           <Route path="quiz/:sessionId" element={<QuizSessionPage />} />
           <Route path="quiz/:sessionId/result" element={<QuizResultPage />} />
           <Route path="cases" element={<ClinicalCasesPage />} />
+          <Route path="calculators" element={<CalculatorsPage />} />
+          <Route path="anatomy-3d" element={<Anatomy3DPage />} />
           <Route path="study" element={<StudyPomodoroPage />} />
           <Route path="activity" element={<ActivityPage />} />
           <Route path="rewards" element={<RewardsCatalogPage />} />
