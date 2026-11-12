@@ -15,6 +15,7 @@ import {
   UserLevelHistoryEntry,
 } from '../types/domain';
 import { PROSTATE_CANCER_QUESTIONS } from './prostateCancerQuestions';
+import { RENAL_CANCER_QUESTIONS } from './renalCancerQuestions';
 
 export const DEMO_USERS: Profile[] = [
   {
@@ -619,6 +620,7 @@ export const INITIAL_QUESTIONS: Question[] = [
     ],
   },
   ...PROSTATE_CANCER_QUESTIONS,
+  ...RENAL_CANCER_QUESTIONS,
 ];
 
 export const INITIAL_POINT_RULES: PointRule[] = [

@@ -230,14 +230,14 @@ describe('UroChallenge Domain & Repository Engine', () => {
     expect(uroRepository.getCurrentUser()?.id).toBe(created.id);
   });
 
-  it('9. Diccionario Urológico: carga 14 categorías, 50 términos publicados (incluyendo los 23 de cáncer de próstata) y ejecuta búsqueda inteligente por abreviaturas y sinónimos', () => {
+  it('9. Diccionario Urológico: carga 14 categorías, 74 términos publicados (incluyendo los 23 de cáncer de próstata y 24 de tumores renales con fotografías) y ejecuta búsqueda inteligente por abreviaturas y sinónimos', () => {
     const userId = 'user-demo-01';
     const categories = uroRepository.getDictionaryCategories(false);
     expect(categories.length).toBe(14);
 
-    // Regular users only see published terms (50 published out of 52 total)
+    // Regular users only see published terms (74 published out of 76 total)
     const publishedTerms = uroRepository.getDictionaryTerms({ userId, includeUnpublished: false });
-    expect(publishedTerms.length).toBe(50);
+    expect(publishedTerms.length).toBe(74);
     expect(publishedTerms.every((t) => t.editorial_status === 'published')).toBe(true);
 
     // Search by exact abbreviation "HPB" returns Hiperplasia prostática benigna first

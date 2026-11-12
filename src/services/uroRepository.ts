@@ -330,8 +330,16 @@ class UroChallengeRepository {
         migrated = true;
       } else {
         for (const seedTerm of INITIAL_DICTIONARY_TERMS) {
-          if (!parsed.dictionaryTerms.some((t) => t.id === seedTerm.id)) {
+          const existingTerm = parsed.dictionaryTerms.find((t) => t.id === seedTerm.id);
+          if (!existingTerm) {
             parsed.dictionaryTerms.push(seedTerm);
+            migrated = true;
+          } else if (
+            existingTerm.image_url !== seedTerm.image_url ||
+            JSON.stringify(existingTerm.gallery_urls) !== JSON.stringify(seedTerm.gallery_urls)
+          ) {
+            existingTerm.image_url = seedTerm.image_url;
+            existingTerm.gallery_urls = seedTerm.gallery_urls;
             migrated = true;
           }
         }

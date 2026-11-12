@@ -155,7 +155,16 @@ export const DictionaryMainPage: React.FC = () => {
     setSearchParams(nextParams, { replace: true });
   };
 
-  const quickSearchSuggestions = ['HPB', 'PSA', 'STUI', 'Hematuria', 'Litiasis', 'Torsión'];
+  const quickSearchSuggestions = [
+    'CCR',
+    'Bosniak',
+    'Stauffer',
+    'Neves-Zincke',
+    'HPB',
+    'PSA',
+    'PI-RADS',
+    'Litiasis',
+  ];
 
   return (
     <div className="space-y-6" data-tick={tick}>
@@ -636,6 +645,23 @@ const TermListCard: React.FC<{
         <p className="text-xs sm:text-sm text-[#858BA1] mt-2 line-clamp-3 leading-relaxed">
           <HighlightedText text={term.short_definition} query={query} />
         </p>
+
+        {term.image_url && (
+          <div className="mt-3 rounded-2xl overflow-hidden border border-slate-100 bg-slate-50/80 flex items-center gap-3 p-2">
+            <img
+              src={term.image_url}
+              alt={`Ilustración de ${term.term}`}
+              loading="lazy"
+              className="w-16 h-12 object-contain rounded-xl bg-white border border-slate-200/70 shrink-0"
+            />
+            <span className="text-[11px] font-bold text-[#5149B8] leading-snug">
+              Incluye fotografía / esquema clínico de la literatura
+              {term.gallery_urls && term.gallery_urls.length > 1
+                ? ` (${term.gallery_urls.length} figuras)`
+                : ''}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
@@ -876,17 +902,71 @@ export const DictionaryTermDetailPage: React.FC = () => {
           </div>
         )}
 
-        {/* Optional Schematic / Image */}
-        {term.image_url && (
-          <div className="space-y-2">
-            <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#858BA1]">
-              Esquema / Ilustración de apoyo
+        {/* Optional Schematic / Image & Literature Gallery */}
+        {(term.image_url || (term.gallery_urls && term.gallery_urls.length > 0)) && (
+          <div className="space-y-3">
+            <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#5149B8] flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Fotografías, Esquemas y Tablas de la Literatura</span>
             </h3>
-            <img
-              src={term.image_url}
-              alt={`Esquema anatómico o clínico de ${term.term}`}
-              className="rounded-3xl max-h-80 object-contain border border-slate-200 bg-slate-50 p-2"
-            />
+            {term.gallery_urls && term.gallery_urls.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {term.gallery_urls.map((img, idx) => (
+                  <figure
+                    key={`${img.url}-${idx}`}
+                    className="rounded-3xl border border-slate-200 bg-[#F5F7FC] p-3.5 flex flex-col justify-between gap-2.5"
+                  >
+                    <a
+                      href={img.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Abrir imagen en tamaño completo"
+                      className="block bg-white rounded-2xl p-2 border border-slate-100 hover:border-[#5149B8]/40 transition"
+                    >
+                      <img
+                        src={img.url}
+                        alt={img.caption || `Ilustración clínica de ${term.term}`}
+                        loading="lazy"
+                        className="w-full max-h-80 object-contain mx-auto rounded-xl"
+                      />
+                    </a>
+                    <figcaption className="flex items-start justify-between gap-2 px-1">
+                      <span className="text-xs font-bold text-[#202744] leading-snug">
+                        {img.caption}
+                      </span>
+                      <a
+                        href={img.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] font-extrabold text-[#5149B8] hover:underline inline-flex items-center gap-1 shrink-0"
+                      >
+                        <span>Ampliar</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            ) : (
+              term.image_url && (
+                <figure className="rounded-3xl border border-slate-200 bg-[#F5F7FC] p-4 space-y-2">
+                  <a
+                    href={term.image_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Abrir imagen en tamaño completo"
+                    className="block bg-white rounded-2xl p-2 border border-slate-100"
+                  >
+                    <img
+                      src={term.image_url}
+                      alt={`Esquema anatómico o clínico de ${term.term}`}
+                      loading="lazy"
+                      className="rounded-xl max-h-96 w-full object-contain mx-auto"
+                    />
+                  </a>
+                </figure>
+              )
+            )}
           </div>
         )}
 

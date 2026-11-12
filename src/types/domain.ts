@@ -435,6 +435,7 @@ export interface UrologyTerm {
   full_definition: string;
   category_id: string;
   image_url: string | null;
+  gallery_urls?: Array<{ url: string; caption: string }>;
   editorial_status: TermEditorialStatus;
   is_demo_pending_review: boolean;
   created_by: string;

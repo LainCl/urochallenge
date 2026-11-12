@@ -13,6 +13,13 @@ import {
   PROSTATE_CANCER_DICTIONARY_REFERENCES,
   PROSTATE_CANCER_DICTIONARY_RELATIONS,
 } from './prostateCancerDictionaryData';
+import {
+  RENAL_CANCER_DICTIONARY_TERMS,
+  RENAL_CANCER_DICTIONARY_ALIASES,
+  RENAL_CANCER_DICTIONARY_TAGS,
+  RENAL_CANCER_DICTIONARY_REFERENCES,
+  RENAL_CANCER_DICTIONARY_RELATIONS,
+} from './renalCancerDictionaryData';
 
 const SEED_DATE = '2026-10-15T10:00:00.000Z';
 
@@ -712,6 +719,7 @@ export const INITIAL_DICTIONARY_TERMS: UrologyTerm[] = [
     updated_at: SEED_DATE,
   },
   ...PROSTATE_CANCER_DICTIONARY_TERMS,
+  ...RENAL_CANCER_DICTIONARY_TERMS,
 ];
 
 export const INITIAL_DICTIONARY_ALIASES: UrologyTermAlias[] = [
@@ -780,6 +788,7 @@ export const INITIAL_DICTIONARY_ALIASES: UrologyTermAlias[] = [
   // NLP
   { id: 'ualias-33', term_id: 'uterm-29', alias: 'NLP', alias_type: 'abbreviation' },
   ...PROSTATE_CANCER_DICTIONARY_ALIASES,
+  ...RENAL_CANCER_DICTIONARY_ALIASES,
 ];
 
 export const INITIAL_DICTIONARY_TAGS: UrologyTermTag[] = [
@@ -797,6 +806,7 @@ export const INITIAL_DICTIONARY_TAGS: UrologyTermTag[] = [
   { id: 'utag-12', term_id: 'uterm-23', tag: 'escroto agudo' },
   { id: 'utag-13', term_id: 'uterm-24', tag: 'alfa bloqueador' },
   ...PROSTATE_CANCER_DICTIONARY_TAGS,
+  ...RENAL_CANCER_DICTIONARY_TAGS,
 ];
 
 export const INITIAL_DICTIONARY_REFERENCES: UrologyTermReference[] = [
@@ -831,6 +841,7 @@ export const INITIAL_DICTIONARY_REFERENCES: UrologyTermReference[] = [
     accessed_at: '2026-10-15',
   },
   ...PROSTATE_CANCER_DICTIONARY_REFERENCES,
+  ...RENAL_CANCER_DICTIONARY_REFERENCES,
 ];
 
 // Bidirectional / explicit relationships including the exact HPB example required by the specification
@@ -972,4 +983,5 @@ export const INITIAL_DICTIONARY_RELATIONS: UrologyTermRelation[] = [
     created_at: SEED_DATE,
   },
   ...PROSTATE_CANCER_DICTIONARY_RELATIONS,
+  ...RENAL_CANCER_DICTIONARY_RELATIONS,
 ];
